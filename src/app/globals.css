@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --color-plum: #5B2A3C;
+  --color-plum-dark: #3E1B28;
+  --color-peach: #F2A98B;
+  --color-cream: #FFF4EA;
+  --color-ink: #3E1B28;
+  --color-muted: #6B4452;
+  --color-line: #E8D6C8;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  background: var(--color-plum);
+  color: var(--color-cream);
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--color-plum-dark); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  border: 2px solid var(--color-plum);
+  color: var(--color-plum);
+  background: transparent;
+}
+.btn-outline:hover { background: #fff; }
+
+.field {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: #fff;
+  color: var(--color-ink);
+}
+.field:focus { outline: 2px solid var(--color-plum); outline-offset: 1px; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  padding: 1.25rem;
+}
