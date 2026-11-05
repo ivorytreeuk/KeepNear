@@ -6,7 +6,17 @@ KeepNear lets people record video, photo and document keepsakes inside the app, 
 
 Owned by Ivory Tree Inc Ltd.
 
-## What's built (v0.1)
+## What's new in v0.2
+
+- Public site: landing, About (with FAQs), Pricing, Contact (messages saved to `contact_messages`)
+- "Kept safe" page after saving a keepsake, recommending the next plan up
+- Stripe payments: monthly, yearly and Lifetime; upgrades change the existing subscription; billing portal for cards, invoices and cancelling. Products and prices are created in Stripe automatically on first use.
+- Settings: name, password, plan and billing
+- Security: passkeys (Supabase), two-step verification with an authenticator app, enforced before the vault opens; welcome page after sign-up encourages both
+
+Extra setup for v0.2: run `supabase/migrations/0002_billing_contact.sql`, add the secret variables in `.env.example`, and create a Stripe webhook pointing at `/api/stripe/webhook` listening for `checkout.session.completed`, `customer.subscription.updated` and `customer.subscription.deleted`.
+
+## What was built in v0.1
 
 - Landing page and pricing page
 - Sign up, log in, log out (Supabase Auth)

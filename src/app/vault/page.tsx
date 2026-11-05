@@ -28,6 +28,15 @@ export default async function VaultPage({
   ]);
 
   const plan = getPlan(profile?.plan);
+  const hasMfa = (user!.factors ?? []).some((f) => f.status === "verified");
+  let hasPasskey = false;
+  try {
+    const { data: pk } = await supabase.auth.passkey.list();
+    hasPasskey = (pk ?? []).length > 0;
+  } catch {
+    hasPasskey = false;
+  }
+  const secured = hasMfa || hasPasskey;
   const list = keepsakes ?? [];
   const used = {
     video: list.filter((k) => k.kind === "video").length,
@@ -54,6 +63,18 @@ export default async function VaultPage({
           <Link href="/vault/upload" className="btn-outline">Add photo or document</Link>
         </div>
       </div>
+
+      {!secured && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-plum p-4 text-cream">
+          <div>
+            <p className="font-bold">Lock your vault properly</p>
+            <p className="text-sm opacity-90">Add a passkey or two-step verification. It takes about a minute.</p>
+          </div>
+          <Link href="/vault/settings#security" className="inline-flex min-h-11 items-center rounded-full bg-cream px-5 font-bold text-plum">
+            Secure my vault
+          </Link>
+        </div>
+      )}
 
       {!holder && (
         <div className="mt-6 rounded-2xl border border-peach bg-white p-4">

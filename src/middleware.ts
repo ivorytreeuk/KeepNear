@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { needsSecondStep } from "@/lib/aal";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -25,16 +26,29 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && request.nextUrl.pathname.startsWith("/vault")) {
+  const path = request.nextUrl.pathname;
+  const protectedPath = path.startsWith("/vault");
+
+  if (!user && protectedPath) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
-    login.searchParams.set("next", request.nextUrl.pathname);
+    login.search = "";
+    login.searchParams.set("next", path);
     return NextResponse.redirect(login);
+  }
+
+  // Two-step verification: if it's switched on, the code must be entered before the vault opens.
+  if (user && protectedPath && (await needsSecondStep(supabase))) {
+    const verify = request.nextUrl.clone();
+    verify.pathname = "/login/verify";
+    verify.search = "";
+    verify.searchParams.set("next", path);
+    return NextResponse.redirect(verify);
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

@@ -139,7 +139,16 @@ export async function saveKeepsakeSettings(formData: FormData) {
   }
 
   revalidatePath(`/vault/${id}`);
-  redirect(`/vault/${id}?saved=1`);
+  revalidatePath("/vault");
+  redirect(`/vault/${id}/saved`);
+}
+
+export async function updateName(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const fullName = String(formData.get("full_name") ?? "").trim().slice(0, 120);
+  if (fullName) await supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id);
+  revalidatePath("/vault");
+  redirect("/vault/settings?saved=name");
 }
 
 export async function addRecipient(formData: FormData) {

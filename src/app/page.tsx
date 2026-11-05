@@ -54,6 +54,31 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-5xl px-4 pt-16" aria-labelledby="who">
+          <h2 id="who" className="text-3xl font-extrabold text-plum">Made for moments like these</h2>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-3">
+            <li className="card">
+              <h3 className="font-bold">New parents</h3>
+              <p className="mt-1 text-muted">A message for their first day of school, their 18th, their wedding. Just in case.</p>
+            </li>
+            <li className="card">
+              <h3 className="font-bold">Grandparents</h3>
+              <p className="mt-1 text-muted">The family stories, the recipes, the voice they&apos;ll want to hear again.</p>
+            </li>
+            <li className="card">
+              <h3 className="font-bold">Anyone writing a will</h3>
+              <p className="mt-1 text-muted">Your will says who gets what. KeepNear lets you say why, and what they meant to you.</p>
+            </li>
+          </ul>
+          <div className="mt-6 flex flex-wrap items-center gap-4 rounded-2xl bg-white p-5">
+            <p className="flex-1 text-lg">
+              <strong>Free</strong> for your first video. Plans from <strong>£2.99 a month</strong> when you want more.
+            </p>
+            <Link href="/pricing" className="btn">See plans</Link>
+            <Link href="/about" className="font-bold text-plum underline">Questions people ask</Link>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-5xl px-4 py-16" aria-labelledby="trust">
           <h2 id="trust" className="text-3xl font-extrabold text-plum">Private by design</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -83,9 +108,9 @@ export default function Home() {
               Offer KeepNear to your clients alongside their will. We&apos;re looking for founding partners in England
               and Wales.
             </p>
-            <a href="mailto:info@keepnear.co.uk?subject=KeepNear%20partnership" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-cream px-5 font-bold text-plum">
+            <Link href="/contact?topic=partner" className="mt-5 inline-flex min-h-11 items-center rounded-full bg-cream px-5 font-bold text-plum">
               Talk to us
-            </a>
+            </Link>
           </div>
         </section>
       </main>
