@@ -49,7 +49,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { full_name: fullName, terms_accepted_at: new Date().toISOString(), terms_version: "2026-11-05" },
           emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(afterConfirm)}`,
         },
       });
@@ -131,6 +131,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             />
             {mode === "signup" && <span className="text-xs font-normal text-muted">At least 8 characters.</span>}
           </label>
+
+          {mode === "signup" && (
+            <label className="flex items-start gap-3 text-sm">
+              <input type="checkbox" name="agree" required className="mt-0.5 h-5 w-5 shrink-0" />
+              <span>
+                I&apos;m 18 or over and I agree to the{" "}
+                <Link href="/legal/terms" target="_blank" className="font-bold text-plum underline">Terms of Use</Link>. I&apos;ve read the{" "}
+                <Link href="/legal/privacy" target="_blank" className="font-bold text-plum underline">Privacy Policy</Link>.
+              </span>
+            </label>
+          )}
 
           {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
           {message && <p role="status" className="rounded-xl bg-cream p-3 text-sm">{message}</p>}

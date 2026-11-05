@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/VaultHeader";
 import { SecuritySettings } from "@/components/SecuritySettings";
-import { updateName } from "../actions";
+import { closeAccount, updateName } from "../actions";
 import { getPlan } from "@/lib/plans";
 
 export const metadata = { title: "Settings · KeepNear" };
@@ -88,6 +88,35 @@ export default async function SettingsPage({
         <div className="mt-3">
           <SecuritySettings />
         </div>
+      </section>
+
+      <section id="close" className="mt-10 scroll-mt-6" aria-labelledby="close-h">
+        <h2 id="close-h" className="text-xl font-extrabold text-plum">Close your account</h2>
+        {sp.close === "confirm" && (
+          <p role="alert" className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800">Type DELETE in capitals to confirm.</p>
+        )}
+        {sp.close === "unavailable" && (
+          <p role="alert" className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+            We couldn&apos;t close your account automatically. Please email info@keepnear.co.uk from your account email and
+            we&apos;ll do it within 7 days.
+          </p>
+        )}
+        <details className="card mt-3">
+          <summary className="cursor-pointer font-bold text-red-800">I want to close my account</summary>
+          <p className="mt-3 text-sm">
+            This permanently deletes every keepsake in your vault, your recipients and your release holder. Nothing will
+            ever be released. Any subscription is cancelled. This can&apos;t be undone.
+          </p>
+          <form action={closeAccount} className="mt-4 flex flex-col gap-3">
+            <label className="flex flex-col gap-1 font-bold">
+              Type DELETE to confirm
+              <input name="confirm" required autoComplete="off" className="field max-w-xs font-normal" />
+            </label>
+            <button type="submit" className="inline-flex min-h-11 items-center self-start rounded-full bg-red-800 px-5 font-bold text-white">
+              Close my account and delete everything
+            </button>
+          </form>
+        </details>
       </section>
     </PageShell>
   );

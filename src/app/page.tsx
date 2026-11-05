@@ -9,11 +9,21 @@ const STEPS = [
   { title: "Delivered when it matters", body: "After we've confirmed a death, each person receives only the keepsakes meant for them." },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const sp = await searchParams;
   return (
     <>
       <SiteHeader />
       <main>
+        {sp.closed && (
+          <p role="status" className="mx-auto mt-4 max-w-5xl rounded-xl bg-white p-3 px-4 text-sm">
+            Your account has been closed and everything in it deleted. Thank you for trying KeepNear.
+          </p>
+        )}
         <section className="mx-auto grid max-w-5xl items-center gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
           <div>
             <h1 className="text-4xl font-extrabold leading-tight text-plum md:text-5xl">

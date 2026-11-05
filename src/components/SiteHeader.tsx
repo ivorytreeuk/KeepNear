@@ -56,6 +56,11 @@ export function SiteFooter() {
           <p>
             <a href="mailto:info@keepnear.co.uk" className="font-bold text-plum underline">info@keepnear.co.uk</a>
           </p>
+          <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 font-bold text-plum">
+            <Link href="/legal/terms" className="hover:underline">Terms</Link>
+            <Link href="/legal/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/legal/cookies" className="hover:underline">Cookies</Link>
+          </p>
           <p className="mt-3">
             © {new Date().getFullYear()} KeepNear, a service of Ivory Tree Inc Ltd. Registered in England and Wales,
             company no. 14329140.

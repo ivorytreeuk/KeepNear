@@ -206,6 +206,46 @@ export async function saveReleaseHolder(formData: FormData) {
   redirect("/vault?holder=1");
 }
 
+/** Permanently deletes the account, every keepsake file and any subscription. */
+export async function closeAccount(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  if (String(formData.get("confirm") ?? "").trim().toUpperCase() !== "DELETE") {
+    redirect("/vault/settings?close=confirm#close");
+  }
+
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    redirect("/vault/settings?close=unavailable#close");
+  }
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("stripe_subscription_id")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.stripe_subscription_id && process.env.STRIPE_SECRET_KEY) {
+    const { stripe } = await import("@/lib/stripe");
+    await stripe().subscriptions.cancel(profile.stripe_subscription_id).catch(() => null);
+  }
+
+  // Remove every file in the user's vault folder, in batches.
+  for (;;) {
+    const { data: files } = await admin.storage.from(BUCKET).list(user.id, { limit: 100 });
+    if (!files || files.length === 0) break;
+    await admin.storage.from(BUCKET).remove(files.map((f) => `${user.id}/${f.name}`));
+    if (files.length < 100) break;
+  }
+
+  // Deleting the login removes the profile, keepsakes, recipients and release holder with it.
+  await admin.auth.admin.deleteUser(user.id);
+  await supabase.auth.signOut();
+  redirect("/?closed=1");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

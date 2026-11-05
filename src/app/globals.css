@@ -65,3 +65,17 @@ body {
   border-radius: 20px;
   padding: 1.25rem;
 }
+
+/* Legal pages */
+.legal h2 { margin-top: 2.5rem; font-size: 1.5rem; font-weight: 800; color: var(--color-plum); }
+.legal h3 { margin-top: 1.5rem; font-size: 1.15rem; font-weight: 700; color: var(--color-plum-dark); }
+.legal p, .legal li { line-height: 1.65; }
+.legal p { margin-top: 0.75rem; }
+.legal ul { margin-top: 0.75rem; padding-left: 1.25rem; list-style: disc; }
+.legal ol { margin-top: 0.75rem; padding-left: 1.25rem; list-style: decimal; }
+.legal li { margin-top: 0.35rem; }
+.legal a { color: var(--color-plum); font-weight: 700; text-decoration: underline; }
+.legal table { margin-top: 1rem; width: 100%; border-collapse: collapse; font-size: 0.95rem; background: #fff; border-radius: 12px; overflow: hidden; }
+.legal th, .legal td { border: 1px solid var(--color-line); padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
+.legal th { background: var(--color-cream); font-weight: 700; }
+.legal .table-wrap { overflow-x: auto; }
