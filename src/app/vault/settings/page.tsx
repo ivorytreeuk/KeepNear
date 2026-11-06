@@ -72,7 +72,7 @@ export default async function SettingsPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {plan.id !== "lifetime" && <Link href="/pricing" className="btn">Change plan</Link>}
+            <Link href="/vault/plan" className="btn">{plan.id === "lifetime" ? "View my plan" : "Change plan"}</Link>
             {profile?.stripe_customer_id && (
               <form action="/api/billing-portal" method="post">
                 <button type="submit" className="btn-outline">Card, invoices and cancelling</button>

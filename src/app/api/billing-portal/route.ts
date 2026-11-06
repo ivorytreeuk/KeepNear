@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   const session = await stripe().billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
-    return_url: `${base}/vault/settings`,
+    return_url: `${base}/vault/plan`,
   });
   return NextResponse.redirect(session.url, 303);
 }

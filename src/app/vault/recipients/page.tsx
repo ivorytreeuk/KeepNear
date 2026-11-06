@@ -33,7 +33,7 @@ export default async function RecipientsPage({
 
       {sp.error === "limit" && (
         <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
-          Your plan is full. <Link href="/pricing" className="font-bold underline">Upgrade</Link> to add more people.
+          Your plan is full. <Link href="/vault/plan" className="font-bold underline">Upgrade</Link> to add more people.
         </p>
       )}
       {sp.error === "name" && (

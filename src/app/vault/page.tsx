@@ -127,7 +127,7 @@ export default async function VaultPage({
       </section>
 
       <p className="mt-10 text-sm text-muted">
-        Need more space? <Link href="/pricing" className="font-bold text-plum underline">See plans</Link>
+        Need more space? <Link href="/vault/plan" className="font-bold text-plum underline">See plans</Link>
       </p>
     </PageShell>
   );

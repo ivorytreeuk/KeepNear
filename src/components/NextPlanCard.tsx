@@ -55,7 +55,7 @@ export function NextPlanCard({ currentPlanId }: { currentPlanId: string | null |
         <input type="hidden" name="plan" value={next.id} />
         <input type="hidden" name="interval" value="monthly" />
         <button type="submit" className="btn">Move to {next.name}</button>
-        <Link href="/pricing" className="font-bold text-plum underline">Compare all plans</Link>
+        <Link href="/vault/plan" className="font-bold text-plum underline">Compare all plans</Link>
       </form>
     </section>
   );

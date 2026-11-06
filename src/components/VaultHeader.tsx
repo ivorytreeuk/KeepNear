@@ -13,6 +13,7 @@ export function VaultHeader() {
           <Link href="/vault" className="rounded-full px-3 py-2 hover:bg-cream">Vault</Link>
           <Link href="/vault/recipients" className="rounded-full px-3 py-2 hover:bg-cream">Recipients</Link>
           <Link href="/vault/release-holder" className="rounded-full px-3 py-2 hover:bg-cream">Release holder</Link>
+          <Link href="/vault/plan" className="rounded-full px-3 py-2 hover:bg-cream">My plan</Link>
           <Link href="/vault/settings" className="rounded-full px-3 py-2 hover:bg-cream">Settings</Link>
           <form action={signOut}>
             <button type="submit" className="rounded-full px-3 py-2 text-muted hover:bg-cream">Log out</button>

@@ -114,7 +114,7 @@ export default async function KeepsakePage({
           {!plan.milestones && (
             <p className="text-xs text-muted">
               Birthday and wedding-day messages come with the Plus plan.{" "}
-              <Link href="/pricing" className="font-bold text-plum underline">See plans</Link>
+              <Link href="/vault/plan" className="font-bold text-plum underline">See plans</Link>
             </p>
           )}
         </fieldset>

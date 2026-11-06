@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     .single();
 
   if (profile?.plan === "lifetime") {
-    return NextResponse.redirect(`${base}/vault/settings?billing=lifetime`, 303);
+    return NextResponse.redirect(`${base}/vault/plan?billing=lifetime`, 303);
   }
 
   const s = stripe();
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({ plan: plan.id, plan_interval: interval })
         .eq("id", user.id);
-      return NextResponse.redirect(`${base}/vault/settings?billing=changed`, 303);
+      return NextResponse.redirect(`${base}/vault/plan?billing=changed`, 303);
     }
   }
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       : { subscription_data: { metadata: { user_id: user.id, plan: plan.id } } }),
     allow_promotion_codes: true,
     billing_address_collection: "auto",
-    success_url: `${base}/vault/settings?billing=success`,
+    success_url: `${base}/vault/plan?billing=success`,
     cancel_url: `${base}/pricing?cancelled=1`,
   });
 

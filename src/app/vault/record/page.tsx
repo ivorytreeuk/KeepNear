@@ -29,7 +29,7 @@ export default async function RecordPage() {
         {full ? (
           <div className="card text-center">
             <p className="font-bold">You&apos;ve used all {plan.videos} video{plan.videos === 1 ? "" : "s"} on your plan.</p>
-            <Link href="/pricing" className="btn mt-4">See plans</Link>
+            <Link href="/vault/plan" className="btn mt-4">See plans</Link>
           </div>
         ) : (
           <Recorder maxSeconds={plan.videoMinutes * 60} />
