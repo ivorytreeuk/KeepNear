@@ -79,3 +79,21 @@ body {
 .legal th, .legal td { border: 1px solid var(--color-line); padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
 .legal th { background: var(--color-cream); font-weight: 700; }
 .legal .table-wrap { overflow-x: auto; }
+
+/* Landing page motion (switched off for people who prefer reduced motion) */
+@keyframes kn-float { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--r, 0deg)); } }
+@keyframes kn-float-sm { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes kn-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes kn-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes kn-bar { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+.kn-float { animation: kn-float 7s ease-in-out infinite; }
+.kn-float-slow { animation: kn-float 9s ease-in-out infinite; animation-delay: -3s; }
+.kn-float-sm { animation: kn-float-sm 4s ease-in-out infinite; transform-box: fill-box; }
+.kn-pulse { animation: kn-pulse 1.4s ease-in-out infinite; }
+.kn-rise { animation: kn-rise 0.8s ease-out both; }
+.kn-rise-2 { animation: kn-rise 0.8s ease-out 0.15s both; }
+.kn-rise-3 { animation: kn-rise 0.8s ease-out 0.3s both; }
+.kn-bar { transform-origin: bottom; animation: kn-bar 1.1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .kn-float, .kn-float-slow, .kn-float-sm, .kn-pulse, .kn-rise, .kn-rise-2, .kn-rise-3, .kn-bar { animation: none; }
+}
