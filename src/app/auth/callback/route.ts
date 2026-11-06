@@ -10,7 +10,11 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${next}`);
+    if (!error) {
+      if (next === "/reset-password") return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}/verified?next=${encodeURIComponent(next)}`);
+    }
   }
-  return NextResponse.redirect(`${origin}/login?error=link`);
+  // Usually means the link was opened on a different device. The email is still confirmed.
+  return NextResponse.redirect(`${origin}/verified?status=invalid`);
 }

@@ -19,6 +19,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState<string | null>(null);
+  const [signedUpEmail, setSignedUpEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(
     params.get("error") === "link" ? "That link has expired or was opened in a different browser. Please log in." : null
   );
@@ -65,8 +66,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         router.refresh();
         return;
       }
+      setSignedUpEmail(email);
       return setMessage(
-        "Nearly there. We've sent you an email: tap the link inside to confirm your account. Open it on this device if you can, and check your spam folder."
+        "Nearly there. We've sent you an email: tap the link inside to confirm your account. You can open it on any device. Nothing after a few minutes? Check your spam folder."
       );
     }
 
@@ -217,6 +219,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             </button>
           )}
           {message && <p role="status" className="rounded-xl bg-cream p-3 text-sm">{message}</p>}
+          {signedUpEmail && mode === "signup" && (
+            <Link href="/login?next=/vault/welcome" className="btn-outline">
+              Confirmed on your phone? Log in here
+            </Link>
+          )}
 
           <button type="submit" className="btn mt-2" disabled={busy}>
             {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
