@@ -30,6 +30,7 @@ export default function PrivacyPage() {
       <h3>About you, the account holder</h3>
       <ul>
         <li><strong>Account details:</strong> your name, email address and password (stored only as a secure hash, never readable by us).</li>
+        <li><strong>Security question:</strong> the question you choose, and your answer stored only as a one-way scrambled code. Nobody, including us, can read the answer back; we can only check whether an answer you give matches.</li>
         <li><strong>Security details:</strong> whether you&apos;ve set up two-step verification or passkeys, and the technical information needed to check them. We never see your fingerprint or face; that stays on your device.</li>
         <li><strong>Your keepsakes:</strong> the videos you record, and the photos and documents you upload, with their titles, notes and release settings.</li>
         <li><strong>Payment details:</strong> your plan, billing history and the last four digits and expiry of your card. Your full card number is handled by Stripe, our payment provider, and never reaches us.</li>

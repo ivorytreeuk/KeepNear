@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/VaultHeader";
 import { SecuritySettings } from "@/components/SecuritySettings";
+import { SecurityQuestionForm } from "@/components/SecurityQuestionForm";
 import { closeAccount, updateName } from "../actions";
 import { getPlan } from "@/lib/plans";
 
@@ -28,6 +29,7 @@ export default async function SettingsPage({
     .select("full_name, plan, plan_interval, stripe_customer_id")
     .eq("id", user!.id)
     .single();
+  const { data: sq } = await supabase.from("security_questions").select("question").maybeSingle();
   const plan = getPlan(profile?.plan);
   const intervalLabel =
     profile?.plan_interval === "annual" ? "paid yearly" : profile?.plan_interval === "monthly" ? "paid monthly" : null;
@@ -40,6 +42,7 @@ export default async function SettingsPage({
         <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">{BILLING_MSG[sp.billing]}</p>
       )}
       {sp.saved === "name" && <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">Name saved.</p>}
+      {sp.saved === "password" && <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">Your new password is saved.</p>}
 
       <section className="mt-8" aria-labelledby="details-h">
         <h2 id="details-h" className="text-xl font-extrabold text-plum">Your details</h2>
@@ -85,8 +88,9 @@ export default async function SettingsPage({
       <section id="security" className="mt-10 scroll-mt-6" aria-labelledby="sec-h">
         <h2 id="sec-h" className="text-xl font-extrabold text-plum">Login and security</h2>
         <p className="mt-1 text-sm text-muted">Your vault holds some of the most personal things you&apos;ll ever record. Lock it properly.</p>
-        <div className="mt-3">
+        <div className="mt-3 flex flex-col gap-4">
           <SecuritySettings />
+          <SecurityQuestionForm current={sq?.question ?? null} />
         </div>
       </section>
 

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "./Logo";
+import { SECURITY_QUESTIONS } from "@/lib/security-questions";
+import { signUpAction } from "@/app/signup/actions";
 
 function safeNext(raw: string | null, fallback: string) {
   return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : fallback;
@@ -43,22 +45,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     const supabase = createClient();
 
     if (mode === "signup") {
-      const fullName = String(form.get("full_name") ?? "");
-      const origin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
       const afterConfirm = params.get("next") ? next : "/vault/welcome";
-      const { data, error } = await supabase.auth.signUp({
+      const result = await signUpAction({
+        fullName: String(form.get("full_name") ?? ""),
         email,
         password,
-        options: {
-          data: { full_name: fullName, terms_accepted_at: new Date().toISOString(), terms_version: "2026-11-05" },
-          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(afterConfirm)}`,
-        },
+        confirm: String(form.get("confirm") ?? ""),
+        question: String(form.get("question") ?? ""),
+        answer: String(form.get("answer") ?? ""),
+        next: afterConfirm,
       });
       setBusy(false);
-      if (error) return setError(error.message);
-      if (data.session) return router.push(afterConfirm);
+      if (result.error) return setError(result.error);
+      if (result.existing) {
+        return setError("There's already an account with this email. Please log in, or reset your password if you've forgotten it.");
+      }
+      if (result.session) {
+        router.push(afterConfirm);
+        router.refresh();
+        return;
+      }
       return setMessage(
-        "Nearly there. We've sent you an email: tap the link inside to confirm your account. Open it on this device if you can."
+        "Nearly there. We've sent you an email: tap the link inside to confirm your account. Open it on this device if you can, and check your spam folder."
       );
     }
 
@@ -154,6 +162,42 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             />
             {mode === "signup" && <span className="text-xs font-normal text-muted">At least 8 characters.</span>}
           </label>
+          {mode === "login" && (
+            <Link href="/forgot-password" className="-mt-2 self-end text-sm font-bold text-plum underline">
+              Forgot your password?
+            </Link>
+          )}
+
+          {mode === "signup" && (
+            <>
+              <label className="flex flex-col gap-1 font-bold">
+                Type your password again
+                <input name="confirm" type="password" required minLength={8} autoComplete="new-password" className="field font-normal" />
+              </label>
+
+              <fieldset className="flex flex-col gap-3 rounded-2xl bg-cream p-4">
+                <legend className="px-1 font-bold">Security question</legend>
+                <p className="-mt-1 text-xs text-muted">
+                  If you ever lose access to your account, we&apos;ll use this to check it&apos;s really you. Pick an answer
+                  you&apos;ll remember but others couldn&apos;t look up.
+                </p>
+                <label className="flex flex-col gap-1 text-sm font-bold">
+                  Question
+                  <select name="question" required defaultValue="" className="field font-normal">
+                    <option value="" disabled>Choose a question…</option>
+                    {SECURITY_QUESTIONS.map((q) => (
+                      <option key={q} value={q}>{q}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1 text-sm font-bold">
+                  Your answer
+                  <input name="answer" required minLength={2} maxLength={100} autoComplete="off" className="field font-normal" />
+                  <span className="text-xs font-normal text-muted">Not case-sensitive. Stored scrambled, so nobody can read it.</span>
+                </label>
+              </fieldset>
+            </>
+          )}
 
           {mode === "signup" && (
             <label className="flex items-start gap-3 text-sm">
