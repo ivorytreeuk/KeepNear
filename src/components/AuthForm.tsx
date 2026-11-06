@@ -16,6 +16,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const next = safeNext(params.get("next"), "/vault");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [unconfirmed, setUnconfirmed] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(
     params.get("error") === "link" ? "That link has expired or was opened in a different browser. Please log in." : null
   );
@@ -63,8 +64,30 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) return setError("That email and password don't match. Please try again.");
+    if (error) {
+      const code = (error as { code?: string }).code;
+      if (code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
+        setUnconfirmed(email);
+        return setError("You haven't confirmed your email yet. Tap the link in the email we sent, or we can send a new one.");
+      }
+      return setError("That email and password don't match. Please try again.");
+    }
     await afterLogin();
+  }
+
+  async function resendConfirmation() {
+    if (!unconfirmed) return;
+    setBusy(true);
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const { error } = await createClient().auth.resend({
+      type: "signup",
+      email: unconfirmed,
+      options: { emailRedirectTo: `${origin}/auth/callback?next=/vault/welcome` },
+    });
+    setBusy(false);
+    if (error) return setError("We couldn't send another email just now. Please wait a minute and try again.");
+    setError(null);
+    setMessage(`We've sent a new confirmation email to ${unconfirmed}. Check your inbox and spam folder.`);
   }
 
   async function passkeyLogin() {
@@ -144,6 +167,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           )}
 
           {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+          {unconfirmed && mode === "login" && !message && (
+            <button type="button" onClick={resendConfirmation} disabled={busy} className="btn-outline">
+              Send me a new confirmation email
+            </button>
+          )}
           {message && <p role="status" className="rounded-xl bg-cream p-3 text-sm">{message}</p>}
 
           <button type="submit" className="btn mt-2" disabled={busy}>
