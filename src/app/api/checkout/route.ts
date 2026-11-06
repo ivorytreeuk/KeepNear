@@ -5,6 +5,18 @@ import { getPlan, planRank, type PlanId } from "@/lib/plans";
 import { paymentsEnabled, priceFor, siteUrl, stripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
+  try {
+    return await startCheckout(request);
+  } catch (err) {
+    const e = err as { type?: string; code?: string; message?: string };
+    console.error("[checkout] failed:", e?.type, e?.code, e?.message);
+    const base = siteUrl(new URL(request.url).origin);
+    const reason = encodeURIComponent(String(e?.code || e?.type || "unknown").slice(0, 60));
+    return NextResponse.redirect(`${base}/vault/plan?billing=error&reason=${reason}`, 303);
+  }
+}
+
+async function startCheckout(request: Request) {
   const origin = new URL(request.url).origin;
   const base = siteUrl(origin);
   const form = await request.formData();

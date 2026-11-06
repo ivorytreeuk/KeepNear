@@ -82,6 +82,13 @@ export default async function MyPlanPage({
       {sp.billing && MESSAGES[sp.billing] && (
         <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">{MESSAGES[sp.billing]}</p>
       )}
+      {sp.billing === "error" && (
+        <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+          Sorry, we couldn&apos;t open the payment page just now, and you haven&apos;t been charged. Please try again in a
+          few minutes, or email info@keepnear.co.uk.
+          {sp.reason && <span className="mt-1 block text-xs opacity-80">Reference: {sp.reason}</span>}
+        </p>
+      )}
 
       <section className="card mt-6" aria-labelledby="current-h">
         <div className="flex flex-wrap items-start justify-between gap-4">
