@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/VaultHeader";
 import { LogoMark } from "@/components/Logo";
 import { NextPlanCard } from "@/components/NextPlanCard";
+import { fmtDate } from "@/lib/keepsake-types";
 
 export const metadata = { title: "Saved · KeepNear" };
 
@@ -17,7 +18,7 @@ export default async function SavedPage({ params }: { params: Promise<{ id: stri
   } = await supabase.auth.getUser();
 
   const [{ data: k }, { data: links }, { data: profile }, { data: holder }] = await Promise.all([
-    supabase.from("keepsakes").select("id, kind, title, release_on, release_date").eq("id", id).maybeSingle(),
+    supabase.from("keepsakes").select("id, kind, title, category, release_on, release_date").eq("id", id).maybeSingle(),
     supabase.from("keepsake_recipients").select("recipients(full_name)").eq("keepsake_id", id),
     supabase.from("profiles").select("plan").eq("id", user!.id).single(),
     supabase.from("release_holders").select("full_name").maybeSingle(),
@@ -33,10 +34,13 @@ export default async function SavedPage({ params }: { params: Promise<{ id: stri
       : names.length === 1
         ? names[0]
         : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const living = k.category === "living";
   const when =
-    k.release_on === "date" && k.release_date
-      ? `on ${new Date(k.release_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
-      : "when the time comes";
+    living && k.release_date
+      ? `on ${fmtDate(k.release_date)}`
+      : k.release_on === "date" && k.release_date
+        ? `on ${fmtDate(k.release_date)}, after you're gone`
+        : "when the time comes";
   const kindWord = KIND[k.kind as keyof typeof KIND] ?? "keepsake";
 
   return (
@@ -64,7 +68,7 @@ export default async function SavedPage({ params }: { params: Promise<{ id: stri
           )}
         </div>
 
-        {!holder && (
+        {!holder && !living && (
           <p className="mt-6 rounded-xl bg-white p-3 text-sm">
             One more thing: nobody can release your keepsakes until you add a release holder.{" "}
             <Link href="/vault/release-holder" className="font-bold text-plum underline">Add one now</Link>

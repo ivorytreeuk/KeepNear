@@ -5,6 +5,8 @@ import { PageShell } from "@/components/VaultHeader";
 import { ProtectedMedia } from "@/components/ProtectedMedia";
 import { deleteKeepsake, saveKeepsakeSettings } from "../actions";
 import { getPlan } from "@/lib/plans";
+import { ReleaseFields } from "@/components/ReleaseFields";
+import { asCategory } from "@/lib/keepsake-types";
 
 export const metadata = { title: "Keepsake · KeepNear" };
 
@@ -37,8 +39,17 @@ export default async function KeepsakePage({
   return (
     <PageShell>
       <Link href="/vault" className="text-sm font-bold text-plum underline">← Back to vault</Link>
-      {sp.new && <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">Saved safely to your vault. Now choose who it&apos;s for.</p>}
+      {sp.new && (
+        <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">
+          Saved safely to your vault. Now choose who it&apos;s for{sp.type === "living" ? " and the day it should arrive" : ""}.
+        </p>
+      )}
       {sp.saved && <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm">Changes saved.</p>}
+      {sp.error === "date" && (
+        <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+          Please choose a delivery date in the future for a &ldquo;While I&apos;m alive&rdquo; keepsake.
+        </p>
+      )}
 
       <h1 className="mt-3 text-3xl font-extrabold text-plum">{k.title}</h1>
       <p className="mt-1 text-sm text-muted">
@@ -86,38 +97,12 @@ export default async function KeepsakePage({
           )}
         </fieldset>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="font-bold">When should it be released?</legend>
-          <label className="flex min-h-11 items-center gap-3">
-            <input type="radio" name="release_on" value="after_death" defaultChecked={k.release_on !== "date"} className="h-5 w-5" />
-            After I die, once my release holder confirms
-          </label>
-          <label className={`flex min-h-11 flex-wrap items-center gap-3 ${plan.milestones ? "" : "opacity-60"}`}>
-            <input
-              type="radio"
-              name="release_on"
-              value="date"
-              defaultChecked={k.release_on === "date"}
-              disabled={!plan.milestones}
-              className="h-5 w-5"
-            />
-            On a special date after I&apos;m gone
-            <input
-              type="date"
-              name="release_date"
-              defaultValue={k.release_date ?? ""}
-              disabled={!plan.milestones}
-              className="field w-auto"
-              aria-label="Release date"
-            />
-          </label>
-          {!plan.milestones && (
-            <p className="text-xs text-muted">
-              Birthday and wedding-day messages come with the Plus plan.{" "}
-              <Link href="/vault/plan" className="font-bold text-plum underline">See plans</Link>
-            </p>
-          )}
-        </fieldset>
+        <ReleaseFields
+          category={sp.type === "living" ? "living" : asCategory(k.category)}
+          releaseOn={k.release_on}
+          releaseDate={k.release_date}
+          milestones={plan.milestones}
+        />
 
         <button type="submit" className="btn self-start">Save changes</button>
       </form>

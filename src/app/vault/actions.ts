@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPlan, limitFor, type Kind } from "@/lib/plans";
+import { asCategory, tomorrowISO } from "@/lib/keepsake-types";
 
 const BUCKET = "vault";
 
@@ -74,6 +75,8 @@ export async function startKeepsake(input: {
     mime_type: input.mimeType,
     size_bytes: input.sizeBytes,
     duration_seconds: input.durationSeconds ?? null,
+    // Saved as "after I'm gone" until the next screen, where a time capsule gets its delivery date.
+    category: "legacy",
   });
   if (error) return { error: "Couldn't save that. Please try again." };
 
@@ -112,21 +115,31 @@ export async function saveKeepsakeSettings(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim().slice(0, 120);
   const note = String(formData.get("note") ?? "").trim().slice(0, 1000) || null;
+  const category = asCategory(formData.get("category"));
   const releaseOn = formData.get("release_on") === "date" ? "date" : "after_death";
-  const releaseDate = releaseOn === "date" ? String(formData.get("release_date") ?? "") || null : null;
+  const rawDate = String(formData.get("release_date") ?? "");
+  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && rawDate >= tomorrowISO() ? rawDate : null;
   const recipientIds = formData.getAll("recipients").map(String);
 
   const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
   const plan = getPlan(profile?.plan);
-  const allowDate = plan.milestones && releaseOn === "date" && releaseDate;
+
+  let release: { category: string; release_on: string; release_date: string | null };
+  if (category === "living") {
+    // A time capsule must have a future date.
+    if (!validDate) redirect(`/vault/${id}?error=date`);
+    release = { category, release_on: "date", release_date: validDate };
+  } else {
+    const allowDate = plan.milestones && releaseOn === "date" && validDate;
+    release = { category, release_on: allowDate ? "date" : "after_death", release_date: allowDate ? validDate : null };
+  }
 
   await supabase
     .from("keepsakes")
     .update({
       ...(title ? { title } : {}),
       note,
-      release_on: allowDate ? "date" : "after_death",
-      release_date: allowDate ? releaseDate : null,
+      ...release,
     })
     .eq("id", id)
     .eq("owner_id", user.id);

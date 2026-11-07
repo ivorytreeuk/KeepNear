@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, VAULT_BUCKET } from "@/lib/supabase/client";
 import { abandonKeepsake, finishKeepsake, startKeepsake } from "@/app/vault/actions";
+import { CategoryPicker } from "./CategoryPicker";
+import type { Category } from "@/lib/keepsake-types";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const DOC_TYPES = [
@@ -16,6 +18,7 @@ export function Uploader() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<Category>("legacy");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +56,7 @@ export function Uploader() {
       return setError("The upload didn't finish. Please try again.");
     }
     await finishKeepsake(started.id);
-    router.push(`/vault/${started.id}?new=1`);
+    router.push(`/vault/${started.id}?new=1&type=${category}`);
   }
 
   return (
@@ -79,6 +82,7 @@ export function Uploader() {
           />
         </label>
       )}
+      {file && <CategoryPicker value={category} onChange={setCategory} />}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
       <button type="submit" className="btn self-start" disabled={!file || busy}>
         {busy ? "Saving to your vault…" : "Save to vault"}

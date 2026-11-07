@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/VaultHeader";
 import { fmtLimit, getPlan } from "@/lib/plans";
+import { deliveryLine } from "@/lib/keepsake-types";
 
 export const metadata = { title: "Your vault · KeepNear" };
 
@@ -22,7 +23,7 @@ export default async function VaultPage({
     supabase.from("profiles").select("full_name, plan").eq("id", user!.id).single(),
     supabase
       .from("keepsakes")
-      .select("id, kind, title, created_at, status, release_on, release_date, keepsake_recipients(count)")
+      .select("id, kind, title, created_at, status, category, release_on, release_date, keepsake_recipients(count)")
       .order("created_at", { ascending: false }),
     supabase.from("release_holders").select("full_name, firm").maybeSingle(),
   ]);
@@ -107,16 +108,14 @@ export default async function VaultPage({
                 <li key={k.id}>
                   <Link href={`/vault/${k.id}`} className="card block hover:border-plum">
                     <span className="text-xs font-bold uppercase tracking-wider text-muted">
-                      {KIND_LABEL[k.kind as keyof typeof KIND_LABEL]}
+                      {KIND_LABEL[k.kind as keyof typeof KIND_LABEL]} · {k.category === "living" ? "Time capsule" : "After I'm gone"}
                       {k.status !== "ready" && " · not finished saving"}
                     </span>
                     <span className="mt-1 block text-lg font-bold">{k.title}</span>
                     <span className="mt-1 block text-sm text-muted">
                       {recipients === 0 ? "No recipients yet" : `For ${recipients} ${recipients === 1 ? "person" : "people"}`}
                       {" · "}
-                      {k.release_on === "date" && k.release_date
-                        ? `Released ${new Date(k.release_date).toLocaleDateString("en-GB")}`
-                        : "Released after death"}
+                      {deliveryLine(k)}
                     </span>
                   </Link>
                 </li>

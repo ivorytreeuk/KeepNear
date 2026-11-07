@@ -25,9 +25,20 @@ export default function TermsPage() {
       <h2>2. What KeepNear is, and what it isn&apos;t</h2>
       <p>
         KeepNear lets you record videos and store photos and documents (&ldquo;keepsakes&rdquo;) in a private vault,
-        choose who each keepsake is for (&ldquo;recipients&rdquo;), and have them delivered after your death, or on a
-        date you choose after your death, once your death has been confirmed through the process in section 7.
+        choose who each keepsake is for (&ldquo;recipients&rdquo;), and decide when it is delivered. Each keepsake is
+        one of two kinds:
       </p>
+      <ul>
+        <li>
+          <strong>&ldquo;After I&apos;m gone&rdquo;</strong> keepsakes are released only after your death has been
+          confirmed through the process in section 7, either straight away or on a later date you choose.
+        </li>
+        <li>
+          <strong>&ldquo;While I&apos;m alive&rdquo;</strong> keepsakes (time capsules) are delivered on a date you
+          choose. You can change the date or cancel the delivery until the day before. They don&apos;t need a release
+          holder, and they are not delivered early if you die before the date.
+        </li>
+      </ul>
       <p>
         <strong>KeepNear is not a will and is not legal advice.</strong> A keepsake cannot pass on money, property or
         possessions, appoint guardians or executors, or change your will. In England and Wales a will must be in

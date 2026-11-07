@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient, VAULT_BUCKET } from "@/lib/supabase/client";
 import { abandonKeepsake, finishKeepsake, startKeepsake } from "@/app/vault/actions";
 import { keepAlive } from "./IdleLogout";
+import { CategoryPicker } from "./CategoryPicker";
+import type { Category } from "@/lib/keepsake-types";
 
 type Stage = "idle" | "live" | "recording" | "review" | "saving";
 
@@ -40,6 +42,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
   const [blob, setBlob] = useState<Blob | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<Category>("legacy");
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
 
@@ -186,7 +189,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
 
     await finishKeepsake(started.id);
     clearInterval(ping);
-    router.push(`/vault/${started.id}?new=1`);
+    router.push(`/vault/${started.id}?new=1&type=${category}`);
   }
 
   const remaining = Math.max(0, maxSeconds - seconds);
@@ -230,6 +233,12 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
           </div>
         )}
       </div>
+
+      {(stage === "idle" || stage === "live") && (
+        <div className="card">
+          <CategoryPicker value={category} onChange={setCategory} />
+        </div>
+      )}
 
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
 
@@ -279,7 +288,11 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
               Record again
             </button>
           </div>
-          <p className="text-xs text-muted">Recorded {fmt(seconds)}. You can choose who receives it on the next screen.</p>
+          <CategoryPicker value={category} onChange={setCategory} name="category-review" legend="Is this for after you're gone, or while you're alive?" />
+          <p className="text-xs text-muted">
+            Recorded {fmt(seconds)}. On the next screen you&apos;ll choose who receives it
+            {category === "living" ? " and the day it arrives." : "."}
+          </p>
         </form>
       )}
     </div>
