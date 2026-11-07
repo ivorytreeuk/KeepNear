@@ -7,14 +7,22 @@ export function emailEnabled() {
 }
 
 /** Sends one email through Resend. Returns an error message, or null on success. */
-export async function sendEmail(to: string, subject: string, html: string): Promise<string | null> {
+export async function sendEmail(to: string, subject: string, html: string, opts?: { important?: boolean }): Promise<string | null> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return "RESEND_API_KEY is not set";
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [to], subject, html, reply_to: "info@keepnear.co.uk" }),
+      body: JSON.stringify({
+        from: FROM,
+        to: [to],
+        subject,
+        html,
+        reply_to: "info@keepnear.co.uk",
+        // Shows as "High importance" in Outlook, Apple Mail and most others.
+        ...(opts?.important ? { headers: { "X-Priority": "1 (Highest)", "X-MSMail-Priority": "High", Importance: "high" } } : {}),
+      }),
     });
     if (!res.ok) return `Resend ${res.status}: ${(await res.text()).slice(0, 200)}`;
     return null;

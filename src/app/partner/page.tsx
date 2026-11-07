@@ -25,7 +25,7 @@ export default async function PartnerDashboard() {
   const { data: memberships } = await admin.from("partner_members").select("partner_id").eq("email", email);
   const ids = (memberships ?? []).map((m) => m.partner_id);
   const { data: partners } = ids.length
-    ? await admin.from("partners").select("id, slug, name, type, commission_rate, active, website").in("id", ids)
+    ? await admin.from("partners").select("id, slug, name, type, commission_rate, active, website, reference, source").in("id", ids)
     : { data: [] };
   const list = partners ?? [];
   const stats = await partnerStats(list);
@@ -75,7 +75,19 @@ export default async function PartnerDashboard() {
                   <p className="text-muted">
                     {PARTNER_TYPES[p.type]} · {p.active ? "Listed in the KeepNear directory" : "Not currently listed in the directory"}
                   </p>
+                  {p.reference && (
+                    <p className="mt-3 inline-block rounded-xl border-2 border-peach bg-cream px-4 py-2 text-sm">
+                      Partner reference: <strong className="font-mono text-base tracking-widest text-plum">{p.reference}</strong>
+                    </p>
+                  )}
                 </div>
+
+                {!p.active && p.source === "signup" && (
+                  <p role="status" className="rounded-2xl bg-white p-4 text-sm">
+                    <strong>Thanks for registering.</strong> We&apos;re checking your details and will add you to our
+                    directory, usually within two working days. Your referral link below works now.
+                  </p>
+                )}
 
                 <div className="card">
                   <h2 className="text-lg font-extrabold text-plum">Your referral link</h2>

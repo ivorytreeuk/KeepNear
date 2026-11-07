@@ -10,7 +10,7 @@ const HOURS = 8;
 export function adminEmails() {
   return (process.env.ADMIN_EMAILS || "")
     .split(",")
-    .map((s) => s.trim().toLowerCase())
+    .map((s) => s.trim().replace(/^["']|["']$/g, "").trim().toLowerCase())
     .filter(Boolean);
 }
 
@@ -50,9 +50,14 @@ async function sessionValid(userId: string) {
 
 /** For pages: anyone who isn't an admin sees a plain "not found", so the admin area stays hidden. */
 export async function adminGate() {
+  const supabase = await createClient();
+  const {
+    data: { user: signedIn },
+  } = await supabase.auth.getUser();
+  if (!signedIn) notFound();
   const user = await getAdminUser();
-  if (!user) notFound();
-  return { user, unlocked: await sessionValid(user.id), configured: passcodeConfigured() };
+  if (!user) return { user: null, signedInEmail: signedIn.email ?? "", listEmpty: adminEmails().length === 0, unlocked: false, configured: passcodeConfigured() };
+  return { user, signedInEmail: user.email ?? "", listEmpty: false, unlocked: await sessionValid(user.id), configured: passcodeConfigured() };
 }
 
 /** For actions: must be an admin with an unlocked session. */

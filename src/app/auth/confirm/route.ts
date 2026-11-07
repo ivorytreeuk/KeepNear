@@ -20,7 +20,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.verifyOtp({ type: typeRaw, token_hash: tokenHash });
     if (!error) {
       if (typeRaw === "recovery") return NextResponse.redirect(`${origin}/reset-password`);
-      const to = next || "/vault/welcome";
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const isPartner = user?.user_metadata?.account_type === "partner";
+      const to = isPartner ? "/partner" : next || "/vault/welcome";
       return NextResponse.redirect(`${origin}/verified?next=${encodeURIComponent(to)}`);
     }
   }

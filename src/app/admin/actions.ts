@@ -27,6 +27,12 @@ export async function unlockAdmin(_prev: { error?: string } | null, formData: Fo
   redirect("/admin");
 }
 
+export async function signOutToStaff() {
+  const { createClient } = await import("@/lib/supabase/server");
+  await (await createClient()).auth.signOut();
+  redirect("/login/admin");
+}
+
 export async function lockAdmin() {
   await clearAdminSession();
   redirect("/vault");
@@ -166,7 +172,9 @@ export async function createPartner(formData: FormData) {
   let slug = slugify(String(formData.get("slug") || fields.name));
   const { data: clash } = await admin.from("partners").select("id").eq("slug", slug).maybeSingle();
   if (clash) slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
-  const { data, error } = await admin.from("partners").insert({ ...fields, slug }).select("id").single();
+  const { newReference } = await import("@/lib/partner-ref");
+  const reference = await newReference();
+  const { data, error } = await admin.from("partners").insert({ ...fields, slug, reference }).select("id").single();
   if (error || !data) redirect("/admin/partners?error=save");
   await setMembers(data.id, String(formData.get("members") ?? ""));
   revalidatePath("/admin/partners");

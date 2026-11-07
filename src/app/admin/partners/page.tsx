@@ -16,6 +16,9 @@ type Partner = {
   phone: string | null;
   commission_rate: number;
   active: boolean;
+  reference: string | null;
+  source: string | null;
+  contact_name: string | null;
 };
 
 function PartnerForm({ p, members, action, submit }: { p?: Partner; members?: string; action: (f: FormData) => Promise<void>; submit: string }) {
@@ -146,8 +149,15 @@ export default async function PartnersAdmin({
                   return (
                     <tr key={p.id} className="border-t border-line align-top">
                       <td className="p-3">
-                        <p className="font-bold">{p.name} {!p.active && <span className="text-xs font-normal text-muted">(hidden)</span>}</p>
-                        <p className="text-xs text-muted">{PARTNER_TYPES[p.type]} · {p.commission_rate}%</p>
+                        <p className="font-bold">
+                          {p.name}{" "}
+                          {!p.active && (
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${p.source === "signup" ? "bg-peach text-plum-dark" : "text-muted"}`}>
+                              {p.source === "signup" ? "New: check and approve" : "hidden"}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted">{p.reference ?? ""} · {PARTNER_TYPES[p.type]} · {p.commission_rate}%</p>
                       </td>
                       <td className="p-3">{s.views}<span className="block text-xs text-muted">{s.views30} in 30 days</span></td>
                       <td className="p-3">{s.clicks}<span className="block text-xs text-muted">{s.clicks30} in 30 days</span></td>
@@ -169,6 +179,10 @@ export default async function PartnersAdmin({
         <details key={p.id} className="card">
           <summary className="cursor-pointer text-lg font-extrabold text-plum">{p.name}: links and settings</summary>
           <div className="mt-4 grid gap-2 rounded-2xl bg-cream p-4 text-sm">
+            <p><strong>Partner reference:</strong> <span className="font-mono">{p.reference ?? "run migration 0006"}</span>{p.contact_name ? ` · contact: ${p.contact_name}` : ""}{p.contact_email ? ` · ${p.contact_email}` : ""}</p>
+            {!p.active && p.source === "signup" && (
+              <p className="font-bold text-plum-dark">Registered online. Check the firm is genuine (e.g. on the SRA or Law Society register), then tick &ldquo;Show in the public directory&rdquo; and save.</p>
+            )}
             <p><strong>Referral link to give them:</strong> <code className="break-all">{SITE}/r/{p.slug}</code></p>
             <p><strong>Their directory listing:</strong> <a className="text-plum underline" href={`/directory?type=${p.type}`} target="_blank" rel="noopener noreferrer">{SITE}/directory</a></p>
             <p><strong>Partner dashboard:</strong> {SITE}/partner (they log in with a KeepNear account using an email listed below)</p>

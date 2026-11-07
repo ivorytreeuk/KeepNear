@@ -43,8 +43,8 @@ export default async function VerifiedPage({
             <LogoMark size={52} />
           </div>
           <h1 className="text-2xl font-extrabold text-plum">You&apos;re verified</h1>
-          <p>Your email is confirmed and your KeepNear vault is ready.</p>
-          <Link href={next} className="btn w-full">Continue to my vault</Link>
+          <p>Your email is confirmed and your KeepNear {next.startsWith("/partner") ? "partner account" : "vault"} is ready.</p>
+          <Link href={next} className="btn w-full">{next.startsWith("/partner") ? "Continue to my partner dashboard" : "Continue to my vault"}</Link>
           <p className="rounded-xl bg-cream p-3 text-sm">
             Signed up on a different device, like your laptop? Go back to it and log in. Your account is ready there too.
           </p>

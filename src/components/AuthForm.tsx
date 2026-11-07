@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Logo } from "./Logo";
 import { SECURITY_QUESTIONS } from "@/lib/security-questions";
 import { signUpAction } from "@/app/signup/actions";
+import { partnerSignIn } from "@/app/partner/actions";
 
 function safeNext(raw: string | null, fallback: string) {
   return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : fallback;
@@ -68,15 +69,20 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
 
     if (mode === "signup") {
       const afterConfirm = params.get("next") ? next : "/vault/welcome";
-      const result = await signUpAction({
-        fullName: String(form.get("full_name") ?? ""),
-        email,
-        password,
-        confirm: String(form.get("confirm") ?? ""),
-        question: String(form.get("question") ?? ""),
-        answer: String(form.get("answer") ?? ""),
-        next: afterConfirm,
-      });
+      let result: Awaited<ReturnType<typeof signUpAction>>;
+      try {
+        result = await signUpAction({
+          fullName: String(form.get("full_name") ?? ""),
+          email,
+          password,
+          confirm: String(form.get("confirm") ?? ""),
+          question: String(form.get("question") ?? ""),
+          answer: String(form.get("answer") ?? ""),
+          next: afterConfirm,
+        });
+      } catch {
+        result = { error: "We couldn't reach KeepNear. Check your connection and try again." };
+      }
       setBusy(false);
       if (result.error) return setError(result.error);
       if (result.existing) {
@@ -91,6 +97,21 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
       return setMessage(
         "Nearly there. We've sent you an email: tap the link inside to confirm your account. You can open it on any device. Nothing after a few minutes? Check your spam folder."
       );
+    }
+
+    if (variant === "partner") {
+      let r: Awaited<ReturnType<typeof partnerSignIn>>;
+      try {
+        r = await partnerSignIn(email, password);
+      } catch {
+        r = { error: "We couldn't reach KeepNear. Check your connection and try again." };
+      }
+      setBusy(false);
+      if (r.error) {
+        if (r.unconfirmed && email.includes("@")) setUnconfirmed(email);
+        return setError(r.error);
+      }
+      return afterLogin();
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -113,7 +134,7 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
     const { error } = await createClient().auth.resend({
       type: "signup",
       email: unconfirmed,
-      options: { emailRedirectTo: `${origin}/auth/callback?next=/vault/welcome` },
+      options: { emailRedirectTo: `${origin}/auth/callback?next=${variant === "partner" ? "/partner" : "/vault/welcome"}` },
     });
     setBusy(false);
     if (error) return setError("We couldn't send another email just now. Please wait a minute and try again.");
@@ -171,7 +192,7 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
               </svg>
               Log in with a passkey
             </button>
-            <p className="my-4 text-center text-sm text-muted">or use your email</p>
+            <p className="my-4 text-center text-sm text-muted">{variant === "partner" ? "or use your email or reference" : "or use your email"}</p>
           </>
         )}
 
@@ -182,10 +203,17 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
               <input name="full_name" required autoComplete="name" className="field font-normal" />
             </label>
           )}
-          <label className="flex flex-col gap-1 font-bold">
-            Email
-            <input name="email" type="email" required autoComplete="email" className="field font-normal" />
-          </label>
+          {variant === "partner" && mode === "login" ? (
+            <label className="flex flex-col gap-1 font-bold">
+              Company email or partner reference
+              <input name="email" type="text" required autoComplete="username" placeholder="you@firm.co.uk or KNP-XXXXXX" className="field font-normal" />
+            </label>
+          ) : (
+            <label className="flex flex-col gap-1 font-bold">
+              Email
+              <input name="email" type="email" required autoComplete="email" className="field font-normal" />
+            </label>
+          )}
           <label className="flex flex-col gap-1 font-bold">
             Password
             <input
@@ -271,11 +299,10 @@ export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "sign
             <>Not staff? <Link href="/login" className="font-bold text-plum underline">Customer log in</Link></>
           ) : variant === "partner" ? (
             <>
-              First time? Your firm&apos;s login is a free KeepNear account using the email we have on file.{" "}
-              <Link href="/signup?next=/partner" className="font-bold text-plum underline">Create it here</Link>.
+              New partner? <Link href="/partner/signup" className="font-bold text-plum underline">Register your organisation</Link>
               <br />
               <span className="mt-2 inline-block">
-                Not a partner yet? <Link href="/partners" className="font-bold text-plum underline">Find out more</Link>
+                <Link href="/partners" className="font-bold text-plum underline">How partnering works</Link>
               </span>
               <br />
               <span className="mt-2 inline-block">

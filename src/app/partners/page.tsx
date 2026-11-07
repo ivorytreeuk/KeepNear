@@ -18,7 +18,7 @@ const WHO = [
 ];
 
 const STEPS = [
-  ["Tell us about your firm", "Fill in the short form below. We'll reply within two working days and arrange a 20-minute call."],
+  ["Register your firm", "It takes two minutes. You get a unique partner reference by email straight away."],
   ["Get your link and listing", "You get a free listing in our directory, a personal referral link and a partner dashboard."],
   ["Introduce your clients", "Share your link in client emails, will packs or on your website. We'll send you leaflets if you'd like them."],
   ["Earn and track it", "See every click, sign-up and payment in your dashboard. We pay your share every quarter."],
@@ -52,8 +52,9 @@ export default async function PartnersPage({
               up, and you earn a share of every subscription.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#interest" className="btn">Express interest</a>
-              <Link href="/directory" className="rounded-full border border-line bg-white px-5 py-3 font-bold text-plum">See the directory</Link>
+              <Link href="/partner/signup" className="btn">Register as a partner</Link>
+              <a href="#interest" className="rounded-full border border-line bg-white px-5 py-3 font-bold text-plum">Talk to us first</a>
+              <Link href="/partner/login" className="rounded-full px-5 py-3 font-bold text-plum underline">Partner sign-in</Link>
             </div>
           </div>
           <PartnersScene className="w-full" />
@@ -121,7 +122,7 @@ export default async function PartnersPage({
 
         <section id="interest" className="mx-auto max-w-3xl scroll-mt-6 px-4 pb-6" aria-labelledby="int">
           <div className="card">
-            <h2 id="int" className="text-3xl font-extrabold text-plum">Express interest</h2>
+            <h2 id="int" className="text-3xl font-extrabold text-plum">Rather talk first?</h2>
             {sp.sent ? (
               <p role="status" className="mt-4 rounded-xl bg-cream p-4 text-lg">
                 Thank you. We&apos;ve got your details and will be in touch within two working days.
@@ -129,7 +130,8 @@ export default async function PartnersPage({
             ) : (
               <>
                 <p className="mt-2 text-muted">
-                  No commitment. Or email us at{" "}
+                  Leave your details and we&apos;ll call you. Ready now?{" "}
+                  <Link href="/partner/signup" className="font-bold text-plum underline">Register as a partner</Link>. Or email{" "}
                   <a href="mailto:info@keepnear.co.uk" className="font-bold text-plum underline">info@keepnear.co.uk</a>.
                 </p>
                 {sp.error && (
@@ -175,7 +177,7 @@ export default async function PartnersPage({
                   <div aria-hidden="true" className="hidden">
                     <label>Leave this empty <input name="company_site" tabIndex={-1} autoComplete="off" /></label>
                   </div>
-                  <button type="submit" className="btn self-start">Express interest</button>
+                  <button type="submit" className="btn self-start">Ask us to call</button>
                 </form>
               </>
             )}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { adminGate } from "@/lib/admin-auth";
-import { lockAdmin } from "./actions";
+import { lockAdmin, signOutToStaff } from "./actions";
 import { UnlockForm } from "./UnlockForm";
 import { Logo } from "@/components/Logo";
 import { IdleLogout } from "@/components/IdleLogout";
@@ -9,7 +9,31 @@ export const metadata = { title: "Admin · KeepNear", robots: { index: false, fo
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, unlocked, configured } = await adminGate();
+  const { user, signedInEmail, listEmpty, unlocked, configured } = await adminGate();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-plum-dark">
+        <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
+          <div className="mb-6 self-center"><Logo size={40} light /></div>
+          <div className="card flex flex-col gap-3">
+            <h1 className="text-2xl font-extrabold text-plum">This account isn&apos;t a staff account</h1>
+            <p>
+              You&apos;re logged in as <strong>{signedInEmail}</strong>.
+            </p>
+            <p className="text-sm text-muted">
+              {listEmpty
+                ? "ADMIN_EMAILS isn't set up in Vercel yet (or isn't ticked for Production). Add it, then redeploy."
+                : "If this should be an admin account, ADMIN_EMAILS in Vercel must contain this exact email. Fix it, then redeploy."}
+            </p>
+            <form action={signOutToStaff}>
+              <button type="submit" className="btn w-full">Log out and use a different account</button>
+            </form>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!configured) {
     return (
