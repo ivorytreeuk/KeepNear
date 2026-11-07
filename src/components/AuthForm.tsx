@@ -12,10 +12,30 @@ function safeNext(raw: string | null, fallback: string) {
   return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : fallback;
 }
 
-export function AuthForm({ mode }: { mode: "login" | "signup" }) {
+export type AuthVariant = "customer" | "partner" | "admin";
+
+const LOOK: Record<AuthVariant, { home: string; title: string; sub: string; badge?: string }> = {
+  customer: { home: "/vault", title: "Welcome back", sub: "Log in to your KeepNear vault." },
+  partner: {
+    home: "/partner",
+    title: "Partner sign-in",
+    sub: "For solicitors, will writers, funeral directors and other KeepNear partners. See your referrals, clicks and earnings.",
+    badge: "Partners",
+  },
+  admin: {
+    home: "/admin",
+    title: "Staff sign-in",
+    sub: "KeepNear team only. After this you'll be asked for the admin passcode.",
+    badge: "Admin",
+  },
+};
+
+export function AuthForm({ mode, variant = "customer" }: { mode: "login" | "signup"; variant?: AuthVariant }) {
+  const look = LOOK[variant];
+  const isAdmin = variant === "admin";
   const router = useRouter();
   const params = useSearchParams();
-  const next = safeNext(params.get("next"), "/vault");
+  const next = safeNext(params.get("next"), look.home);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState<string | null>(null);
@@ -115,21 +135,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
+    <div className={isAdmin ? "min-h-screen bg-plum-dark" : variant === "partner" ? "min-h-screen bg-gradient-to-b from-white to-cream" : ""}>
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
-      <Link href="/" className="mb-8 self-center" aria-label="KeepNear home">
-        <Logo size={44} />
+      <Link href={variant === "partner" ? "/partners" : "/"} className="mb-4 self-center" aria-label="KeepNear home">
+        <Logo size={44} light={isAdmin} />
       </Link>
-      <div className="card">
+      {look.badge && (
+        <p className={`mb-6 self-center rounded-full px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest ${isAdmin ? "bg-cream/15 text-cream" : "bg-plum text-cream"}`}>
+          {look.badge}
+        </p>
+      )}
+      {!look.badge && <div className="mb-4" />}
+      <div className={`card ${variant === "partner" ? "border-t-4 border-t-peach" : ""}`}>
         <h1 className="text-2xl font-extrabold text-plum">
-          {mode === "signup" ? "Create your vault" : "Welcome back"}
+          {mode === "signup" ? "Create your vault" : look.title}
         </h1>
         <p className="mt-1 text-muted">
-          {mode === "signup" ? "Free to start. Your first video is on us." : "Log in to your KeepNear vault."}
+          {mode === "signup" ? "Free to start. Your first video is on us." : look.sub}
         </p>
 
         {idleNotice && mode === "login" && (
           <p role="status" className="mt-4 rounded-xl bg-cream p-3 text-sm">
-            We logged you out after 15 minutes without activity, to keep your vault safe. Log in again to carry on.
+            We logged you out after 15 minutes without activity, to keep {variant === "customer" ? "your vault" : "everything"} safe. Log in again to carry on.
           </p>
         )}
 
@@ -240,11 +267,33 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <p className="mt-6 text-center text-sm text-muted">
           {mode === "signup" ? (
             <>Already have a vault? <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-bold text-plum underline">Log in</Link></>
+          ) : variant === "admin" ? (
+            <>Not staff? <Link href="/login" className="font-bold text-plum underline">Customer log in</Link></>
+          ) : variant === "partner" ? (
+            <>
+              First time? Your firm&apos;s login is a free KeepNear account using the email we have on file.{" "}
+              <Link href="/signup?next=/partner" className="font-bold text-plum underline">Create it here</Link>.
+              <br />
+              <span className="mt-2 inline-block">
+                Not a partner yet? <Link href="/partners" className="font-bold text-plum underline">Find out more</Link>
+              </span>
+              <br />
+              <span className="mt-2 inline-block">
+                Looking for your own vault? <Link href="/login" className="font-bold text-plum underline">Customer log in</Link>
+              </span>
+            </>
           ) : (
-            <>New to KeepNear? <Link href="/signup" className="font-bold text-plum underline">Create an account</Link></>
+            <>
+              New to KeepNear? <Link href="/signup" className="font-bold text-plum underline">Create an account</Link>
+              <br />
+              <span className="mt-2 inline-block">
+                A partner firm? <Link href="/partner/login" className="font-bold text-plum underline">Partner sign-in</Link>
+              </span>
+            </>
           )}
         </p>
       </div>
     </main>
+    </div>
   );
 }

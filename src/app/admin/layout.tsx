@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { adminGate } from "@/lib/admin-auth";
-import { lockAdmin, unlockAdmin } from "./actions";
+import { lockAdmin } from "./actions";
+import { UnlockForm } from "./UnlockForm";
 import { Logo } from "@/components/Logo";
 import { IdleLogout } from "@/components/IdleLogout";
 
@@ -26,18 +27,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!unlocked) {
     return (
+      <div className="min-h-screen bg-plum-dark">
       <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
-        <div className="mb-8 self-center"><Logo size={40} /></div>
-        <form action={unlockAdmin} className="card flex flex-col gap-4">
-          <h1 className="text-2xl font-extrabold text-plum">KeepNear admin</h1>
-          <p className="text-sm text-muted">Signed in as {user.email}. Enter the admin passcode to continue.</p>
-          <label className="flex flex-col gap-1 font-bold">
-            Admin passcode
-            <input name="passcode" type="password" required autoComplete="current-password" autoFocus className="field font-normal" />
-          </label>
-          <button type="submit" className="btn">Unlock</button>
-        </form>
+        <div className="mb-4 self-center"><Logo size={40} light /></div>
+        <p className="mb-6 self-center rounded-full bg-cream/15 px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-cream">Admin</p>
+        <UnlockForm email={user.email ?? ""} />
       </main>
+      </div>
     );
   }
 

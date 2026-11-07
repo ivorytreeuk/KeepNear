@@ -15,12 +15,14 @@ import { esc, layout, sendEmail } from "@/lib/email";
 
 const HOLD_DAYS = 14;
 
-export async function unlockAdmin(formData: FormData) {
+export async function unlockAdmin(_prev: { error?: string } | null, formData: FormData): Promise<{ error?: string }> {
   const user = await getAdminUser();
   if (!user) redirect("/");
   // Small delay makes guessing the passcode slow.
   await new Promise((r) => setTimeout(r, 600));
-  if (!checkPasscode(String(formData.get("passcode") ?? ""))) redirect("/admin?wrong=1");
+  if (!checkPasscode(String(formData.get("passcode") ?? ""))) {
+    return { error: "That passcode isn't right. It must match ADMIN_PASSCODE in Vercel exactly (capital letters count)." };
+  }
   await setAdminSession(user.id);
   redirect("/admin");
 }

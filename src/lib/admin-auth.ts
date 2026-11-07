@@ -15,7 +15,7 @@ export function adminEmails() {
 }
 
 export function passcodeConfigured() {
-  return Boolean(process.env.ADMIN_PASSCODE && process.env.ADMIN_PASSCODE.length >= 8);
+  return (process.env.ADMIN_PASSCODE?.trim().length ?? 0) >= 8;
 }
 
 function sign(userId: string, exp: number) {
@@ -63,9 +63,9 @@ export async function requireUnlockedAdmin() {
 }
 
 export function checkPasscode(input: string) {
-  const expected = process.env.ADMIN_PASSCODE;
+  const expected = process.env.ADMIN_PASSCODE?.trim();
   if (!expected) return false;
-  return safeEqual(input, expected);
+  return safeEqual(input.trim(), expected);
 }
 
 export async function setAdminSession(userId: string) {

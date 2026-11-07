@@ -62,7 +62,12 @@ export function IdleLogout() {
       if (idle >= IDLE_MS) {
         loggingOut.current = true;
         await createClient().auth.signOut();
-        window.location.href = "/login?reason=idle";
+        const here = window.location.pathname;
+        window.location.href = here.startsWith("/admin")
+          ? "/login/admin?reason=idle"
+          : here.startsWith("/partner")
+            ? "/partner/login?reason=idle"
+            : "/login?reason=idle";
       } else if (idle >= IDLE_MS - WARN_MS) {
         setSecondsLeft(Math.ceil((IDLE_MS - idle) / 1000));
       } else {

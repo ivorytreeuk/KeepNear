@@ -27,11 +27,13 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const protectedPath = path.startsWith("/vault") || path.startsWith("/admin") || path.startsWith("/partner/") || path === "/partner";
+  const isAdminPath = path.startsWith("/admin");
+  const isPartnerPath = path === "/partner" || (path.startsWith("/partner/") && path !== "/partner/login");
+  const protectedPath = path.startsWith("/vault") || isAdminPath || isPartnerPath;
 
   if (!user && protectedPath) {
     const login = request.nextUrl.clone();
-    login.pathname = "/login";
+    login.pathname = isAdminPath ? "/login/admin" : isPartnerPath ? "/partner/login" : "/login";
     login.search = "";
     login.searchParams.set("next", path);
     return NextResponse.redirect(login);
