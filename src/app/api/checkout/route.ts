@@ -94,6 +94,8 @@ async function startCheckout(request: Request) {
     ...(interval === "lifetime"
       ? { payment_intent_data: { metadata: { user_id: user.id, plan: plan.id } } }
       : { subscription_data: { metadata: { user_id: user.id, plan: plan.id } } }),
+    // KeepNear sells only in the UK and handles its own tax, so Stripe's Managed Payments is not used.
+    managed_payments: { enabled: false },
     allow_promotion_codes: true,
     billing_address_collection: "auto",
     success_url: `${base}/vault/plan?billing=success`,
