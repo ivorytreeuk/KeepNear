@@ -32,7 +32,7 @@ export function fmtDate(iso: string) {
 
 /** One line describing when a keepsake goes out. */
 export function deliveryLine(k: { category?: string | null; release_on?: string | null; release_date?: string | null }) {
-  if (k.category === "living" && k.release_date) return `Delivered ${fmtDate(k.release_date)}`;
+  if (k.category === "living" && k.release_date) return `Arrives ${fmtDate(k.release_date)}`;
   if (k.release_on === "date" && k.release_date) return `After I'm gone · on ${fmtDate(k.release_date)}`;
   return "After I'm gone";
 }
