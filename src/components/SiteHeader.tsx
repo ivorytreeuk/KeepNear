@@ -23,6 +23,7 @@ export async function SiteHeader() {
         <nav aria-label="Main" className="flex flex-wrap items-center gap-1 font-bold">
           <Link href="/about" className="rounded-full px-3 py-2 text-plum hover:bg-white">About</Link>
           <Link href="/pricing" className="rounded-full px-3 py-2 text-plum hover:bg-white">Pricing</Link>
+          <Link href="/partners" className="rounded-full px-3 py-2 text-plum hover:bg-white">Partners</Link>
           <Link href="/contact" className="rounded-full px-3 py-2 text-plum hover:bg-white">Contact</Link>
           {loggedIn ? (
             <Link href="/vault" className="btn ml-1">My vault</Link>
@@ -50,7 +51,8 @@ export function SiteFooter() {
           <Link href="/about" className="hover:underline">About KeepNear</Link>
           <Link href="/pricing" className="hover:underline">Pricing</Link>
           <Link href="/contact" className="hover:underline">Contact us</Link>
-          <Link href="/contact?topic=partner" className="hover:underline">For solicitors and funeral directors</Link>
+          <Link href="/partners" className="hover:underline">Partner with us</Link>
+          <Link href="/directory" className="hover:underline">Find a solicitor or funeral director</Link>
         </nav>
         <div className="text-muted">
           <p>

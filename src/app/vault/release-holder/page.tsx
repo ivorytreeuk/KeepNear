@@ -22,6 +22,19 @@ export default async function ReleaseHolderPage({
         so they know to contact us.
       </p>
 
+      <div className="mt-4 flex max-w-2xl flex-col gap-2 rounded-2xl bg-white p-4 text-sm">
+        <p className="font-bold">Don&apos;t have a solicitor?</p>
+        <p className="text-muted">
+          You can name your executor or a family member you trust. Or see firms we recommend (opens in a new tab):
+        </p>
+        <div className="flex flex-wrap gap-2 font-bold">
+          <a href="/directory?type=solicitor" target="_blank" rel="noopener" className="rounded-full border border-line px-4 py-2 text-plum hover:bg-cream">Solicitors</a>
+          <a href="/directory?type=will_writer" target="_blank" rel="noopener" className="rounded-full border border-line px-4 py-2 text-plum hover:bg-cream">Will writers</a>
+          <a href="/directory?type=funeral_director" target="_blank" rel="noopener" className="rounded-full border border-line px-4 py-2 text-plum hover:bg-cream">Funeral directors</a>
+          <a href="/directory" target="_blank" rel="noopener" className="rounded-full border border-line px-4 py-2 text-plum hover:bg-cream">All partners</a>
+        </div>
+      </div>
+
       {sp.error && (
         <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
           Please add their name and email.

@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isValidQuestion } from "@/lib/security-questions";
 
@@ -51,6 +51,23 @@ export async function signUpAction(input: {
       });
     } catch {
       // If this fails, the user is asked to set a question in Settings instead.
+    }
+    // Credit the partner whose referral link brought them here.
+    const ref = (await cookies()).get("kn_ref")?.value;
+    if (ref && /^[0-9a-f-]{36}$/i.test(ref)) {
+      try {
+        const { createAdminClient } = await import("@/lib/supabase/admin");
+        const admin = createAdminClient();
+        const userId = data.user.id;
+        // The profile row is created by a database trigger; retry briefly in case it isn't there yet.
+        for (let i = 0; i < 3; i++) {
+          const { data: rows } = await admin.from("profiles").update({ referred_by: ref }).eq("id", userId).is("referred_by", null).select("id");
+          if (rows?.length) break;
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      } catch {
+        // Never block sign-up over referral tracking.
+      }
     }
   }
 

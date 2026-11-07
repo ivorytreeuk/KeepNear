@@ -26,6 +26,22 @@ function planFromSubscription(sub: Stripe.Subscription) {
   return { plan: plan.id, interval };
 }
 
+
+/** Records money received so it can be traced back to the partner who referred the customer (for 24 months). */
+async function recordPayment(id: string, userId: string | null, amountPence: number, currency: string, description: string) {
+  if (!amountPence || amountPence <= 0) return;
+  const admin = createAdminClient();
+  let partnerId: string | null = null;
+  if (userId) {
+    const { data: p } = await admin.from("profiles").select("referred_by, created_at").eq("id", userId).maybeSingle();
+    const withinTerm = p?.created_at && Date.now() - new Date(p.created_at).getTime() < 730 * 86400000;
+    partnerId = withinTerm ? (p?.referred_by ?? null) : null;
+  }
+  await admin
+    .from("payments")
+    .upsert({ id, user_id: userId, partner_id: partnerId, amount_pence: amountPence, currency, description }, { onConflict: "id", ignoreDuplicates: true });
+}
+
 async function applySubscription(sub: Stripe.Subscription) {
   const admin = createAdminClient();
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
@@ -87,6 +103,7 @@ export async function POST(request: Request) {
           .from("profiles")
           .update({ plan: "lifetime", plan_interval: "lifetime", stripe_customer_id: customerId, stripe_subscription_id: null })
           .eq("id", userId);
+        await recordPayment(session.id, userId, session.amount_total ?? 0, session.currency ?? "gbp", "Lifetime plan");
       }
 
       if (session.mode === "subscription" && session.subscription) {
@@ -100,6 +117,13 @@ export async function POST(request: Request) {
     case "customer.subscription.deleted":
       await applySubscription(event.data.object as Stripe.Subscription);
       break;
+    case "invoice.paid": {
+      const inv = event.data.object as Stripe.Invoice;
+      const customerId = typeof inv.customer === "string" ? inv.customer : inv.customer?.id ?? null;
+      const userId = await findUserId(customerId, null);
+      if (inv.id) await recordPayment(inv.id, userId, inv.amount_paid ?? 0, inv.currency ?? "gbp", inv.lines?.data?.[0]?.description ?? "Subscription");
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });

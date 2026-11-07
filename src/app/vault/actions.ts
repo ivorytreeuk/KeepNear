@@ -129,6 +129,11 @@ export async function saveKeepsakeSettings(formData: FormData) {
     // A time capsule must have a future date.
     if (!validDate) redirect(`/vault/${id}?error=date`);
     release = { category, release_on: "date", release_date: validDate };
+    // …and someone with an email address to send it to.
+    const { data: withEmail } = recipientIds.length
+      ? await supabase.from("recipients").select("id").in("id", recipientIds).eq("owner_id", user.id).not("email", "is", null)
+      : { data: [] };
+    if (!withEmail?.length) redirect(`/vault/${id}?error=contact`);
   } else {
     const allowDate = plan.milestones && releaseOn === "date" && validDate;
     release = { category, release_on: allowDate ? "date" : "after_death", release_date: allowDate ? validDate : null };
@@ -182,6 +187,7 @@ export async function addRecipient(formData: FormData) {
     full_name: fullName.slice(0, 120),
     email: String(formData.get("email") ?? "").trim() || null,
     relationship: String(formData.get("relationship") ?? "").trim() || null,
+    phone: String(formData.get("phone") ?? "").trim().slice(0, 40) || null,
   });
   revalidatePath("/vault/recipients");
   redirect("/vault/recipients");

@@ -29,7 +29,7 @@ export default async function KeepsakePage({
 
   const [{ data: signed }, { data: recipients }, { data: links }, { data: profile }] = await Promise.all([
     supabase.storage.from("vault").createSignedUrl(k.storage_path, 60 * 10),
-    supabase.from("recipients").select("id, full_name, relationship").order("full_name"),
+    supabase.from("recipients").select("id, full_name, relationship, email").order("full_name"),
     supabase.from("keepsake_recipients").select("recipient_id").eq("keepsake_id", id),
     supabase.from("profiles").select("plan").eq("id", user!.id).single(),
   ]);
@@ -48,6 +48,14 @@ export default async function KeepsakePage({
       {sp.error === "date" && (
         <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
           Please choose a delivery date in the future for a &ldquo;While I&apos;m alive&rdquo; keepsake.
+        </p>
+      )}
+
+      {sp.error === "contact" && (
+        <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">
+          A time capsule needs at least one person with an email address, so we can deliver it on the day. Tick
+          someone below, or{" "}
+          <Link href="/vault/recipients" className="font-bold underline">add an email to a recipient</Link>.
         </p>
       )}
 
@@ -91,6 +99,7 @@ export default async function KeepsakePage({
                 <span>
                   {r.full_name}
                   {r.relationship && <span className="text-muted"> · {r.relationship}</span>}
+                  {!r.email && <span className="text-sm text-muted"> · no email yet</span>}
                 </span>
               </label>
             ))

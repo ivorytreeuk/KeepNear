@@ -17,7 +17,7 @@ export default async function RecipientsPage({
     data: { user },
   } = await supabase.auth.getUser();
   const [{ data: recipients }, { data: profile }] = await Promise.all([
-    supabase.from("recipients").select("id, full_name, email, relationship").order("created_at"),
+    supabase.from("recipients").select("id, full_name, email, phone, relationship").order("created_at"),
     supabase.from("profiles").select("plan").eq("id", user!.id).single(),
   ]);
   const plan = getPlan(profile?.plan);
@@ -45,7 +45,7 @@ export default async function RecipientsPage({
           <li key={r.id} className="card flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-bold">{r.full_name}</p>
-              <p className="text-sm text-muted">{[r.relationship, r.email].filter(Boolean).join(" · ") || "No details yet"}</p>
+              <p className="text-sm text-muted">{[r.relationship, r.email, r.phone].filter(Boolean).join(" · ") || "No details yet"}</p>
             </div>
             <form action={removeRecipient}>
               <input type="hidden" name="id" value={r.id} />
@@ -68,10 +68,18 @@ export default async function RecipientsPage({
             Relationship (optional)
             <input name="relationship" placeholder="Daughter, best friend…" maxLength={60} className="field font-normal" />
           </label>
-          <label className="flex flex-col gap-1 font-bold sm:col-span-2">
-            Email (optional, they won&apos;t hear from us until release)
-            <input name="email" type="email" className="field font-normal" />
+          <label className="flex flex-col gap-1 font-bold">
+            Email
+            <input name="email" type="email" autoComplete="off" className="field font-normal" />
           </label>
+          <label className="flex flex-col gap-1 font-bold">
+            Phone (optional)
+            <input name="phone" type="tel" autoComplete="off" className="field font-normal" />
+          </label>
+          <p className="text-sm text-muted sm:col-span-2">
+            Keepsakes are delivered by email, so add one if you can. It&apos;s required for time capsules. We use the
+            phone number only if an email bounces. They won&apos;t hear from us until it&apos;s time.
+          </p>
           <button type="submit" className="btn self-start">Add recipient</button>
         </form>
       )}
