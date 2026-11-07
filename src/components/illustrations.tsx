@@ -124,8 +124,8 @@ export function RecordingScene({ className }: { className?: string }) {
   return (
     <Svg className={className}>
       <Backdrop />
-      <Person skin="#8D5524" hair="short" hairColor="#2B1B17" top={PLUM} x={-14} />
-      <path d="M118 176 C128 168 134 160 140 150" stroke="#8D5524" strokeWidth="14" fill="none" strokeLinecap="round" />
+      <Person skin="#F3C9A8" hair="short" hairColor="#6B4226" top={PLUM} x={-14} />
+      <path d="M118 176 C128 168 134 160 140 150" stroke="#F3C9A8" strokeWidth="14" fill="none" strokeLinecap="round" />
       <rect x="132" y="96" width="40" height="66" rx="8" fill={INK} />
       <rect x="136" y="102" width="32" height="52" rx="4" fill={CREAM} />
       <circle cx="152" cy="146" r="4" fill="#E0533D" className="kn-pulse" />
@@ -141,7 +141,7 @@ export function WeddingScene({ className }: { className?: string }) {
     <Svg className={className}>
       <Backdrop />
       <path d="M58 70 C70 40 130 40 142 70 L160 170 C120 182 80 182 40 170 Z" fill="#FFFFFF" opacity="0.85" />
-      <Person skin="#E0AC69" hair="long" hairColor="#4A2F27" top="#FFFFFF">
+      <Person skin="#C68642" hair="long" hairColor="#1C1714" top="#FFFFFF">
         <path d="M70 140 C84 150 116 150 130 140" stroke={BLUSH} strokeWidth="4" fill="none" />
         <circle cx="100" cy="64" r="5" fill={PEACH} />
         <circle cx="90" cy="66" r="4" fill="#FFFFFF" />
@@ -157,7 +157,7 @@ export function GrandparentScene({ className }: { className?: string }) {
   return (
     <Svg className={className}>
       <Backdrop />
-      <Person skin="#F1C27D" hair="bun" hairColor="#C9C3C0" top={PEACH}>
+      <Person skin="#FAD9C1" hair="bun" hairColor="#C9C3C0" top={PEACH}>
         <circle cx="91" cy="97" r="9" fill="none" stroke={INK} strokeWidth="2.5" />
         <circle cx="109" cy="97" r="9" fill="none" stroke={INK} strokeWidth="2.5" />
         <path d="M100 97 h0" stroke={INK} strokeWidth="2.5" />
@@ -176,12 +176,12 @@ export function NewParentScene({ className }: { className?: string }) {
   return (
     <Svg className={className}>
       <Backdrop />
-      <Person skin="#C68642" hair="curly" hairColor="#2B1B17" top="#7A3E52" />
+      <Person skin="#8D5524" hair="curly" hairColor="#2B1B17" top="#7A3E52" />
       <ellipse cx="100" cy="172" rx="40" ry="22" fill={CREAM} />
-      <circle cx="78" cy="164" r="15" fill="#D9A066" />
+      <circle cx="78" cy="164" r="15" fill="#A0663A" />
       <path d="M72 164 q3 3 6 0 M82 164 q3 3 6 0" stroke={INK} strokeWidth="2" fill="none" strokeLinecap="round" />
       <path d="M66 156 C70 146 86 146 90 156 C84 152 72 152 66 156 Z" fill={PEACH} />
-      <path d="M58 176 C80 194 124 194 142 176" stroke="#C68642" strokeWidth="12" fill="none" strokeLinecap="round" />
+      <path d="M58 176 C80 194 124 194 142 176" stroke="#8D5524" strokeWidth="12" fill="none" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -191,8 +191,8 @@ export function PartnersScene({ className }: { className?: string }) {
   return (
     <Svg className={className}>
       <Backdrop />
-      <Person skin="#F1C27D" hair="wavy" hairColor="#B5651D" top={PEACH} x={-18} y={14} s={0.82} />
-      <Person skin="#5C3A21" hair="short" hairColor="#1A0F0C" top={PLUM} x={52} y={8} s={0.86} />
+      <Person skin="#F6D1B5" hair="wavy" hairColor="#B5651D" top={PEACH} x={-18} y={14} s={0.82} />
+      <Person skin="#E0AC69" hair="short" hairColor="#1A0F0C" top={PLUM} x={52} y={8} s={0.86} />
       <path d="M100 40 c-6 -8 -18 -2 -12 8 l12 12 12 -12 c6 -10 -6 -16 -12 -8z" fill={PEACH} className="kn-float-sm" />
     </Svg>
   );

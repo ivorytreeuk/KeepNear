@@ -99,7 +99,7 @@ export default async function MyPlanPage({
           </div>
           <div className="flex flex-wrap gap-2">
             {plan.id !== "free" && plan.id !== "lifetime" && interval && (
-              <form action="/api/checkout" method="post">
+              <form action="/api/checkout" method="post" target="_blank">
                 <input type="hidden" name="plan" value={plan.id} />
                 <input type="hidden" name="interval" value={interval === "annual" ? "monthly" : "annual"} />
                 <button type="submit" className="btn-outline">
@@ -108,7 +108,7 @@ export default async function MyPlanPage({
               </form>
             )}
             {hasBilling && plan.id !== "free" && (
-              <form action="/api/billing-portal" method="post">
+              <form action="/api/billing-portal" method="post" target="_blank">
                 <button type="submit" className="btn-outline">Card, invoices and cancelling</button>
               </form>
             )}
@@ -168,25 +168,25 @@ export default async function MyPlanPage({
                     <div className="flex w-full flex-col gap-2 sm:w-auto">
                       {p.id === "free" ? (
                         hasBilling ? (
-                          <form action="/api/billing-portal" method="post">
+                          <form action="/api/billing-portal" method="post" target="_blank">
                             <button type="submit" className="btn-outline w-full">Cancel and move to Free</button>
                           </form>
                         ) : null
                       ) : p.id === "lifetime" ? (
-                        <form action="/api/checkout" method="post">
+                        <form action="/api/checkout" method="post" target="_blank">
                           <input type="hidden" name="plan" value="lifetime" />
                           <button type="submit" className="btn w-full">Upgrade for {p.oneOff}</button>
                         </form>
                       ) : (
                         <>
-                          <form action="/api/checkout" method="post">
+                          <form action="/api/checkout" method="post" target="_blank">
                             <input type="hidden" name="plan" value={p.id} />
                             <input type="hidden" name="interval" value="monthly" />
                             <button type="submit" className={`${up ? "btn" : "btn-outline"} w-full`}>
                               {up ? "Upgrade" : "Downgrade"} · {p.monthly}/month
                             </button>
                           </form>
-                          <form action="/api/checkout" method="post">
+                          <form action="/api/checkout" method="post" target="_blank">
                             <input type="hidden" name="plan" value={p.id} />
                             <input type="hidden" name="interval" value="annual" />
                             <button type="submit" className="btn-outline w-full">

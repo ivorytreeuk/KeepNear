@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { signOut } from "@/app/vault/actions";
+import { IdleLogout } from "./IdleLogout";
 
 export function VaultHeader() {
   return (
@@ -28,6 +29,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <VaultHeader />
+      <IdleLogout />
       <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
     </>
   );

@@ -23,6 +23,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [error, setError] = useState<string | null>(
     params.get("error") === "link" ? "That link has expired or was opened in a different browser. Please log in." : null
   );
+  const idleNotice = params.get("reason") === "idle";
 
   async function afterLogin() {
     const supabase = createClient();
@@ -125,6 +126,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <p className="mt-1 text-muted">
           {mode === "signup" ? "Free to start. Your first video is on us." : "Log in to your KeepNear vault."}
         </p>
+
+        {idleNotice && mode === "login" && (
+          <p role="status" className="mt-4 rounded-xl bg-cream p-3 text-sm">
+            We logged you out after 15 minutes without activity, to keep your vault safe. Log in again to carry on.
+          </p>
+        )}
 
         {mode === "login" && (
           <>

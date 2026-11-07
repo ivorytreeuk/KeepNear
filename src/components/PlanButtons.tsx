@@ -23,7 +23,7 @@ export function PlanButtons({
 
   if (plan.id === "lifetime") {
     return (
-      <form action="/api/checkout" method="post">
+      <form action="/api/checkout" method="post" target="_blank">
         <input type="hidden" name="plan" value="lifetime" />
         <button type="submit" className={`${main} w-full`}>Pay {plan.oneOff}</button>
       </form>
@@ -32,12 +32,12 @@ export function PlanButtons({
 
   return (
     <div className="flex flex-col gap-2">
-      <form action="/api/checkout" method="post">
+      <form action="/api/checkout" method="post" target="_blank">
         <input type="hidden" name="plan" value={plan.id} />
         <input type="hidden" name="interval" value="monthly" />
         <button type="submit" className={`${main} w-full`}>{plan.monthly} a month</button>
       </form>
-      <form action="/api/checkout" method="post">
+      <form action="/api/checkout" method="post" target="_blank">
         <input type="hidden" name="plan" value={plan.id} />
         <input type="hidden" name="interval" value="annual" />
         <button type="submit" className="btn-outline w-full">{plan.annual} a year (2 months free)</button>

@@ -51,7 +51,7 @@ export function NextPlanCard({ currentPlanId }: { currentPlanId: string | null |
         </tbody>
       </table>
 
-      <form action="/api/checkout" method="post" className="mt-5 flex flex-wrap items-center gap-3">
+      <form action="/api/checkout" method="post" target="_blank" className="mt-5 flex flex-wrap items-center gap-3">
         <input type="hidden" name="plan" value={next.id} />
         <input type="hidden" name="interval" value="monthly" />
         <button type="submit" className="btn">Move to {next.name}</button>

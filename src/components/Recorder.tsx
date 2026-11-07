@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, VAULT_BUCKET } from "@/lib/supabase/client";
 import { abandonKeepsake, finishKeepsake, startKeepsake } from "@/app/vault/actions";
+import { keepAlive } from "./IdleLogout";
 
 type Stage = "idle" | "live" | "recording" | "review" | "saving";
 
@@ -121,9 +122,14 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
     setSeconds(0);
     setStage("recording");
     const started = Date.now();
+    let lastPing = started;
     timerRef.current = setInterval(() => {
       const s = (Date.now() - started) / 1000;
       setSeconds(s);
+      if (Date.now() - lastPing > 10000) {
+        lastPing = Date.now();
+        keepAlive(); // recording counts as activity, so nobody is logged out mid-message
+      }
       if (s >= maxSeconds) stopRecording();
     }, 250);
   }
@@ -146,6 +152,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
     setError(null);
     setStage("saving");
     setProgress("Saving to your vault…");
+    const ping = setInterval(keepAlive, 10000);
 
     const mimeType = blob.type.split(";")[0] || "video/webm";
     const started = await startKeepsake({
@@ -156,6 +163,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
       durationSeconds: Math.round(seconds),
     });
     if ("error" in started) {
+      clearInterval(ping);
       setError(started.error);
       setStage("review");
       setProgress(null);
@@ -168,6 +176,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
       .upload(started.path, blob, { contentType: mimeType, upsert: false });
 
     if (upErr) {
+      clearInterval(ping);
       await abandonKeepsake(started.id);
       setError("The upload didn't finish. Check your connection and try again. Your recording is still here.");
       setStage("review");
@@ -176,6 +185,7 @@ export function Recorder({ maxSeconds }: { maxSeconds: number }) {
     }
 
     await finishKeepsake(started.id);
+    clearInterval(ping);
     router.push(`/vault/${started.id}?new=1`);
   }
 
