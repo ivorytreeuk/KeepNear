@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { partnerStats } from "@/lib/admin-data";
 import { PartnerView } from "@/components/PartnerView";
+import { PAYS_FOR, giftFund } from "@/lib/gift";
 import { getAdminUser, isAdminUnlocked } from "@/lib/admin-auth";
 import { Logo } from "@/components/Logo";
 import { IdleLogout } from "@/components/IdleLogout";
@@ -35,6 +36,26 @@ export default async function PartnerDashboard({
     : { data: [] };
   const list = partners ?? [];
   const stats = await partnerStats(list);
+  const fund = list.some((p) => (p.reward ?? "gift") === "gift") ? await giftFund() : null;
+  const GIFT_NOTICES: Record<string, string> = {
+    sent: "Thank you. We've received your nomination and will review it within 5 working days.",
+    missing: "Please fill in the family, the supplier, and confirm the family has agreed.",
+    error: "Something went wrong saving that nomination. Please try again or email info@keepnear.co.uk.",
+    denied: "Only people linked to this partner can nominate.",
+  };
+  const giftFor = (id: string) =>
+    fund
+      ? {
+          partnerId: id,
+          added: fund.byPartner[id]?.added ?? 0,
+          paid: fund.byPartner[id]?.paid ?? 0,
+          committed: fund.byPartner[id]?.committed ?? 0,
+          potAvailable: fund.available,
+          awards: fund.awards.filter((a) => a.partner_id === id),
+          paysFor: PAYS_FOR,
+          notice: sp.gift ? GIFT_NOTICES[sp.gift] : undefined,
+        }
+      : undefined;
 
   return (
     <div className="min-h-screen">
@@ -69,7 +90,7 @@ export default async function PartnerDashboard({
             </p>
           </div>
         ) : (
-          list.map((p) => <PartnerView key={p.id} p={p} s={stats[p.id]} />)
+          list.map((p) => <PartnerView key={p.id} p={p} s={stats[p.id]} gift={giftFor(p.id)} />)
         )}
       </main>
     </div>

@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { PARTNER_TYPES } from "@/lib/admin-data";
 import { emailEnabled, esc, layout, sendEmail } from "@/lib/email";
 import { looksLikeReference, newReference, normaliseReference } from "@/lib/partner-ref";
+import { rewardForType } from "@/lib/gift";
 
 type SignUpResult = { error?: string; reference?: string; email?: string; session?: boolean; existing?: boolean };
 
@@ -69,6 +70,7 @@ export async function partnerSignUp(input: Record<string, string>): Promise<Sign
           phone: get("phone", 40) || null,
           website: website ? (website.startsWith("http") ? website : `https://${website}`) : null,
           region: get("region", 120) || null,
+          reward: rewardForType(type),
           active: false, // goes into the directory once KeepNear has checked the firm
           source: "signup",
         })
@@ -140,4 +142,54 @@ export async function partnerSignIn(identifier: string, password: string): Promi
   } catch {
     return { error: "Something went wrong on our side. Please try again." };
   }
+}
+
+/** A Gift partner nominates a family for the KeepNear Gift. */
+export async function nominateFamily(formData: FormData) {
+  const { redirect } = await import("next/navigation");
+  const { PAYS_FOR, GIFT_AMOUNTS } = await import("@/lib/gift");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) redirect("/partner/login");
+  const partnerId = String(formData.get("partner_id") ?? "");
+  const admin = createAdminClient();
+  const { data: member } = await admin
+    .from("partner_members")
+    .select("partner_id")
+    .eq("partner_id", partnerId)
+    .eq("email", user!.email!.toLowerCase())
+    .maybeSingle();
+  if (!member) redirect("/partner?gift=denied");
+
+  const get = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max);
+  const amount = Number(formData.get("amount"));
+  const paysFor = get("pays_for", 60);
+  const row = {
+    partner_id: partnerId,
+    family_label: get("family_label", 60),
+    situation: get("situation", 1500) || null,
+    pays_for: PAYS_FOR.includes(paysFor) ? paysFor : "Other",
+    amount_pence: GIFT_AMOUNTS.includes(amount) ? amount : GIFT_AMOUNTS[0],
+    supplier_name: get("supplier_name", 120),
+    supplier_details: get("supplier_details", 300) || null,
+    consent: formData.get("consent") === "on",
+  };
+  if (!row.family_label || !row.supplier_name || !row.consent) redirect("/partner?gift=missing#gift-h");
+  const { error } = await admin.from("gift_awards").insert(row);
+  if (error) redirect("/partner?gift=error#gift-h");
+
+  if (emailEnabled()) {
+    const { data: p } = await admin.from("partners").select("name").eq("id", partnerId).single();
+    await sendEmail(
+      "info@keepnear.co.uk",
+      `KeepNear Gift nomination from ${p?.name ?? "a partner"}`,
+      layout("New KeepNear Gift nomination", [
+        `<strong>${esc(p?.name ?? "")}</strong> nominated a family for £${(row.amount_pence / 100).toFixed(0)} towards ${esc(row.pays_for)}.`,
+        "Review it in Admin → KeepNear Gift.",
+      ])
+    ).catch(() => null);
+  }
+  redirect("/partner?gift=sent#gift-h");
 }

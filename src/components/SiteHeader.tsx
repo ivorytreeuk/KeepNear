@@ -24,6 +24,7 @@ export async function SiteHeader() {
           <Link href="/about" className="rounded-full px-3 py-2 text-plum hover:bg-white">About</Link>
           <Link href="/pricing" className="rounded-full px-3 py-2 text-plum hover:bg-white">Pricing</Link>
           <Link href="/partners" className="rounded-full px-3 py-2 text-plum hover:bg-white">Partners</Link>
+          <Link href="/gift" className="rounded-full px-3 py-2 text-plum hover:bg-white">The Gift</Link>
           <Link href="/contact" className="rounded-full px-3 py-2 text-plum hover:bg-white">Contact</Link>
           {loggedIn ? (
             <Link href="/vault" className="btn ml-1">My vault</Link>
@@ -52,6 +53,7 @@ export function SiteFooter() {
           <Link href="/pricing" className="hover:underline">Pricing</Link>
           <Link href="/contact" className="hover:underline">Contact us</Link>
           <Link href="/partners" className="hover:underline">Partner with us</Link>
+          <Link href="/gift" className="hover:underline">The KeepNear Gift</Link>
           <Link href="/directory" className="hover:underline">Find a solicitor or funeral director</Link>
         </nav>
         <div className="text-muted">

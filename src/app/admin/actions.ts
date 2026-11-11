@@ -146,6 +146,7 @@ function partnerFields(formData: FormData) {
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     phone: String(formData.get("phone") ?? "").trim() || null,
     commission_rate: rate,
+    reward: formData.get("reward") === "commission" ? "commission" : "gift",
     promo_code: String(formData.get("promo_code") ?? "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 30) || null,
     active: formData.get("active") === "on",
   };
@@ -191,4 +192,27 @@ export async function updatePartner(formData: FormData) {
   await setMembers(id, String(formData.get("members") ?? ""));
   revalidatePath("/admin/partners");
   redirect("/admin/partners?saved=1");
+}
+
+
+/** KeepNear Gift: approve, decline or mark a nomination as paid. */
+export async function decideGift(formData: FormData) {
+  await requireUnlockedAdmin();
+  const id = String(formData.get("id") ?? "");
+  const action = String(formData.get("do") ?? "");
+  const note = String(formData.get("note") ?? "").trim().slice(0, 500) || null;
+  const now = new Date().toISOString();
+  const update =
+    action === "approve"
+      ? { status: "approved", decided_at: now, admin_note: note }
+      : action === "decline"
+        ? { status: "declined", decided_at: now, admin_note: note }
+        : action === "paid"
+          ? { status: "paid", paid_at: now, admin_note: note }
+          : null;
+  if (!id || !update) redirect("/admin/gift?error=1");
+  await createAdminClient().from("gift_awards").update(update).eq("id", id);
+  revalidatePath("/admin/gift");
+  revalidatePath("/gift");
+  redirect(`/admin/gift?done=${action}`);
 }

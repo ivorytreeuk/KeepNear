@@ -20,6 +20,7 @@ type Partner = {
   source: string | null;
   contact_name: string | null;
   promo_code: string | null;
+  reward: string | null;
 };
 
 function PartnerForm({ p, members, action, submit }: { p?: Partner; members?: string; action: (f: FormData) => Promise<void>; submit: string }) {
@@ -57,7 +58,14 @@ function PartnerForm({ p, members, action, submit }: { p?: Partner; members?: st
         <input name="phone" defaultValue={p?.phone ?? ""} className="field font-normal" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-bold">
-        Commission (% of revenue from their referrals)
+        Reward
+        <select name="reward" defaultValue={p?.reward ?? "gift"} className="field font-normal">
+          <option value="gift">KeepNear Gift (20% year one, then 10%, to the fund)</option>
+          <option value="commission">Commission (cash, for 24 months)</option>
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-bold">
+        Commission rate (% , commission partners only)
         <input name="commission_rate" type="number" min={0} max={100} step="0.5" defaultValue={p?.commission_rate ?? 20} className="field font-normal" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-bold">
@@ -145,7 +153,7 @@ export default async function PartnersAdmin({
                   <th className="p-3">Sign-ups</th>
                   <th className="p-3">Paying</th>
                   <th className="p-3">Revenue</th>
-                  <th className="p-3">Commission owed</th>
+                  <th className="p-3">Commission / Gift</th>
                 </tr>
               </thead>
               <tbody>
@@ -162,7 +170,7 @@ export default async function PartnersAdmin({
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-muted">{p.reference ?? ""} · {PARTNER_TYPES[p.type]} · {p.commission_rate}%</p>
+                        <p className="text-xs text-muted">{p.reference ?? ""} · {PARTNER_TYPES[p.type]} · {p.reward === "commission" ? `Commission ${p.commission_rate}%` : "KeepNear Gift"}</p>
                       </td>
                       <td className="p-3">{s.views}<span className="block text-xs text-muted">{s.views30} in 30 days</span></td>
                       <td className="p-3">{s.clicks}<span className="block text-xs text-muted">{s.clicks30} in 30 days</span></td>
@@ -170,7 +178,7 @@ export default async function PartnersAdmin({
                       <td className="p-3">{s.signups}</td>
                       <td className="p-3">{s.paying}</td>
                       <td className="p-3">{gbp(s.revenuePence)}</td>
-                      <td className="p-3 font-bold">{gbp(s.commissionPence)}</td>
+                      <td className="p-3 font-bold">{gbp(s.commissionPence)}<span className="block text-xs font-normal text-muted">{p.reward === "commission" ? "owed to them" : "to the Gift"}</span></td>
                     </tr>
                   );
                 })}

@@ -22,31 +22,38 @@ function lastSixMonths() {
 // Illustrative figures only, for a mid-sized firm a few months in.
 const MONTHS = lastSixMonths();
 const SHAPE = [
-  { clicks: 9, visits: 14, signups: 3, revenuePence: 2397 },
-  { clicks: 12, visits: 19, signups: 4, revenuePence: 6588 },
-  { clicks: 15, visits: 26, signups: 6, revenuePence: 10985 },
-  { clicks: 18, visits: 31, signups: 7, revenuePence: 15782 },
-  { clicks: 22, visits: 38, signups: 9, revenuePence: 21579 },
-  { clicks: 27, visits: 44, signups: 11, revenuePence: 28374 },
+  { clicks: 18, visits: 42, signups: 12, revenuePence: 16779 },
+  { clicks: 24, visits: 57, signups: 16, revenuePence: 46116 },
+  { clicks: 30, visits: 78, signups: 24, revenuePence: 76895 },
+  { clicks: 36, visits: 93, signups: 28, revenuePence: 110474 },
+  { clicks: 44, visits: 114, signups: 36, revenuePence: 151053 },
+  { clicks: 54, visits: 132, signups: 44, revenuePence: 198618 },
 ];
-const monthly = MONTHS.map((month, i) => ({ month, ...SHAPE[i] }));
+const monthly = MONTHS.map((month, i) => ({ month, ...SHAPE[i], sharePence: Math.round(SHAPE[i].revenuePence * 0.2) }));
 const sum = (k: "clicks" | "visits" | "signups" | "revenuePence") => monthly.reduce((t, m) => t + m[k], 0);
 
 const STATS: PartnerStats = {
-  views: 1184,
-  views30: 263,
+  views: 2960,
+  views30: 640,
   clicks: sum("clicks"),
-  clicks30: 27,
+  clicks30: 54,
   visits: sum("visits"),
-  visits30: 44,
+  visits30: 132,
   signups: sum("signups"),
-  paying: 31,
+  paying: 124,
   revenuePence: sum("revenuePence"),
   commissionPence: Math.round(sum("revenuePence") * 0.2),
   monthly,
 };
 
-export default function PartnerDemo() {
+export default async function PartnerDemo({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const sp = await searchParams;
+  const commission = sp.type === "commission";
+  const iso = (m: number) => new Date(Date.now() - m * 30 * 86400000).toISOString();
   return (
     <div className="min-h-screen">
       <header className="border-b border-line bg-white">
@@ -60,24 +67,52 @@ export default function PartnerDemo() {
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div role="note" className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-plum p-4 text-cream">
-          <p>
-            <strong>Example dashboard.</strong> A fictional firm with illustrative figures, to show what partners see.
-          </p>
+          <div>
+            <p>
+              <strong>Example dashboard.</strong> A fictional firm with illustrative figures, to show what partners see.
+            </p>
+            <p className="mt-1 text-sm">
+              {commission ? (
+                <>Commission version. <Link href="/partner/demo" className="font-bold underline">See the KeepNear Gift version</Link></>
+              ) : (
+                <>KeepNear Gift version. <Link href="/partner/demo?type=commission" className="font-bold underline">See the commission version</Link></>
+              )}
+            </p>
+          </div>
           <Link href="/partner/signup" className="rounded-full bg-peach px-4 py-2 text-sm font-extrabold text-plum-dark">Register as a partner</Link>
         </div>
         <PartnerView
           p={{
             id: "demo",
-            slug: "harper-and-lane",
-            name: "Harper & Lane Solicitors (example)",
-            type: "solicitor",
+            slug: commission ? "hartwell" : "harper-and-lane",
+            name: commission ? "Hartwell Financial Planning (example)" : "Harper & Lane Solicitors (example)",
+            type: commission ? "financial_adviser" : "solicitor",
             commission_rate: 20,
             active: true,
             reference: "KNP-H4RP3L",
             source: "admin",
-            promo_code: "HARPER25",
+            promo_code: commission ? "HARTWELL25" : "HARPER25",
+            reward: commission ? "commission" : "gift",
           }}
           s={STATS}
+          demo
+          gift={
+            commission
+              ? undefined
+              : {
+                  partnerId: "demo",
+                  added: STATS.commissionPence,
+                  paid: 75000,
+                  committed: 25000,
+                  potAvailable: 412000,
+                  paysFor: [],
+                  awards: [
+                    { id: "a3", family_label: "J. M.", pays_for: "Headstone or memorial", amount_pence: 25000, status: "approved", created_at: iso(0.3) },
+                    { id: "a2", family_label: "Sarah", pays_for: "Wake or venue", amount_pence: 50000, status: "paid", created_at: iso(1.5) },
+                    { id: "a1", family_label: "The Okafor family", pays_for: "Flowers", amount_pence: 25000, status: "paid", created_at: iso(3) },
+                  ],
+                }
+          }
         />
       </main>
     </div>

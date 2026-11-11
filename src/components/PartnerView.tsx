@@ -1,4 +1,5 @@
 import { PARTNER_TYPES, gbp, type PartnerStats } from "@/lib/admin-data";
+import { GiftPanel, type GiftPanelData } from "./GiftPanel";
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://keepnear.co.uk").replace(/\/$/, "");
 
@@ -12,6 +13,7 @@ export type PartnerViewData = {
   reference: string | null;
   source: string | null;
   promo_code?: string | null;
+  reward?: string | null;
 };
 
 function monthName(m: string) {
@@ -20,14 +22,17 @@ function monthName(m: string) {
 
 export const PARTNER_OFFER = "25% off the Family plan for the first year";
 
-export function PartnerView({ p, s }: { p: PartnerViewData; s: PartnerStats }) {
+export function PartnerView({ p, s, gift, demo }: { p: PartnerViewData; s: PartnerStats; gift?: GiftPanelData; demo?: boolean }) {
+  const isGift = (p.reward ?? "gift") === "gift";
   const tiles: [string, string | number, string][] = [
     ["Seen in our directory", s.views, `${s.views30} in the last 30 days`],
     ["Clicks to your website", s.clicks, `${s.clicks30} in the last 30 days`],
     ["Visits from your link", s.visits, `${s.visits30} in the last 30 days`],
     ["Clients who signed up", s.signups, `${s.paying} on a paid plan`],
     ["Revenue from your clients", gbp(s.revenuePence), "Payments received by KeepNear"],
-    ["Your earnings", gbp(s.commissionPence), `${Number(p.commission_rate)}% revenue share`],
+    isGift
+      ? ["Added to the KeepNear Gift", gbp(s.commissionPence), "20% in year one, then 10%"]
+      : ["Your earnings", gbp(s.commissionPence), `${Number(p.commission_rate)}% for 24 months`],
   ];
   return (
     <section className="flex flex-col gap-6" aria-labelledby={`p-${p.id}`}>
@@ -99,7 +104,7 @@ export function PartnerView({ p, s }: { p: PartnerViewData; s: PartnerStats }) {
               <th className="p-3">Visits from you</th>
               <th className="p-3">Sign-ups</th>
               <th className="p-3">Revenue</th>
-              <th className="p-3">Your earnings</th>
+              <th className="p-3">{isGift ? "To the Gift" : "Your earnings"}</th>
             </tr>
           </thead>
           <tbody>
@@ -110,15 +115,20 @@ export function PartnerView({ p, s }: { p: PartnerViewData; s: PartnerStats }) {
                 <td className="p-3">{m.visits}</td>
                 <td className="p-3">{m.signups}</td>
                 <td className="p-3">{gbp(m.revenuePence)}</td>
-                <td className="p-3">{gbp(Math.round((m.revenuePence * Number(p.commission_rate)) / 100))}</td>
+                <td className="p-3">{gbp(m.sharePence)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      {isGift && gift && <GiftPanel data={gift} demo={demo} />}
+
       <p className="text-sm text-muted">
-        Earnings are paid quarterly once they reach £50. For privacy, we never share the names or details of
+        {isGift
+          ? "Your share goes into the KeepNear Gift, never to your firm. "
+          : "Earnings are paid quarterly once they reach £50, for 24 months from each client's sign-up. "}
+        For privacy, we never share the names or details of
         your clients&apos; KeepNear accounts. Questions? Email{" "}
         <a href="mailto:info@keepnear.co.uk" className="font-bold text-plum underline">info@keepnear.co.uk</a>.
       </p>

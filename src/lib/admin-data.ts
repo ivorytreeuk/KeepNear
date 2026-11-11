@@ -47,7 +47,7 @@ export type PartnerStats = {
   paying: number;
   revenuePence: number;
   commissionPence: number;
-  monthly: { month: string; clicks: number; visits: number; signups: number; revenuePence: number }[];
+  monthly: { month: string; clicks: number; visits: number; signups: number; revenuePence: number; sharePence: number }[];
 };
 
 /** Traffic and revenue for one or more partners. */
@@ -69,14 +69,14 @@ export async function partnerStats(partners: { id: string; commission_rate: numb
   const [{ data: events }, { data: refs }, { data: pays }] = await Promise.all([
     admin.from("partner_events").select("partner_id, type, created_at").in("partner_id", ids).limit(100000),
     admin.from("profiles").select("referred_by, plan, created_at").in("referred_by", ids),
-    admin.from("payments").select("partner_id, amount_pence, created_at").in("partner_id", ids),
+    admin.from("payments").select("partner_id, amount_pence, share_pence, created_at").in("partner_id", ids),
   ]);
 
   for (const p of partners) {
     out[p.id] = {
       views: 0, views30: 0, clicks: 0, clicks30: 0, visits: 0, visits30: 0,
       signups: 0, paying: 0, revenuePence: 0, commissionPence: 0,
-      monthly: months.map((month) => ({ month, clicks: 0, visits: 0, signups: 0, revenuePence: 0 })),
+      monthly: months.map((month) => ({ month, clicks: 0, visits: 0, signups: 0, revenuePence: 0, sharePence: 0 })),
     };
   }
   const bucket = (s: PartnerStats, iso: string) => s.monthly.find((m) => m.month === iso.slice(0, 7));
@@ -102,11 +102,12 @@ export async function partnerStats(partners: { id: string; commission_rate: numb
     const s = out[pay.partner_id as string];
     if (!s) continue;
     s.revenuePence += pay.amount_pence;
+    s.commissionPence += pay.share_pence ?? 0;
     const b = bucket(s, pay.created_at);
-    if (b) b.revenuePence += pay.amount_pence;
-  }
-  for (const p of partners) {
-    out[p.id].commissionPence = Math.round((out[p.id].revenuePence * Number(p.commission_rate)) / 100);
+    if (b) {
+      b.revenuePence += pay.amount_pence;
+      b.sharePence += pay.share_pence ?? 0;
+    }
   }
   return out;
 }

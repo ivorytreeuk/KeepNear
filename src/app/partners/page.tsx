@@ -7,7 +7,7 @@ import { applyToPartner } from "./actions";
 export const metadata = {
   title: "Partner with KeepNear",
   description:
-    "For solicitors, will writers, funeral directors, insurers and hospices: offer your clients KeepNear and earn a share of every subscription.",
+    "For solicitors, funeral directors, hospices, insurers, advisers and will writers: offer your clients KeepNear, and help local families through the KeepNear Gift or earn commission.",
 };
 
 const WHO = [
@@ -21,13 +21,14 @@ const STEPS = [
   ["Register your firm", "It takes two minutes. You get a unique partner reference by email straight away."],
   ["Get your link and listing", "You get a free listing in our directory, a personal referral link and a partner dashboard."],
   ["Introduce your clients", "Share your link in client emails, will packs or on your website. We'll send you leaflets if you'd like them."],
-  ["Earn and track it", "See every click, sign-up and payment in your dashboard. We pay your share every quarter."],
+  ["Track it all", "See every click, sign-up and payment in your dashboard, and nominate families for the Gift."],
 ];
 
 const FAQ = [
   ["Do we have to pay anything?", "No. Partnering is free, and so is your directory listing."],
-  ["How is the revenue share worked out?", "Founding partners receive 20% of every payment from clients they refer, for 24 months from the client's sign-up. It's paid quarterly once your balance reaches £50."],
-  ["We're a regulated firm. Can we accept referral payments?", "Many firms can, as long as clients are told about it. If you'd rather not receive payments, we can pass the value on as a discount for your clients instead. We'll agree the right option with you on our call."],
+  ["Which option is right for us?", "Solicitors, funeral directors, hospices and charities join the KeepNear Gift. Insurers, financial advisers and will-writing companies earn commission. If you'd prefer the other option, tell us."],
+  ["How does the KeepNear Gift work?", "20% of what your referred clients pay in their first year, then 10% for as long as they stay, goes into the fund. Every £250 your clients add unlocks a £250 Gift you can award. You nominate a family from your dashboard, they don't need to be KeepNear customers, and we pay the supplier directly within 5 working days of approval."],
+  ["How is commission worked out?", "20% of every payment from clients you refer, for 24 months from the client's sign-up. If a client upgrades, you get 20% of the higher amount. If we refund a payment, the 20% on it is taken back. Paid quarterly once your balance reaches £50."],
   ["Can our clients' families see anything early?", "No. Only the account owner can view their vault. When they die, the release holder tells us, and after a 14-day hold each person receives only what was meant for them. Release holders never see the content."],
   ["Where is the data kept?", "On encrypted servers in London, in a private store that only the account owner can open."],
 ];
@@ -49,7 +50,8 @@ export default async function PartnersPage({
             <p className="mt-4 text-lg">
               Your clients already trust you with their wishes. KeepNear lets them leave something more personal: video
               messages, letters and photos, released to the people they love at the right moment. You help them set it
-              up, and you earn a share of every subscription.
+              up. Depending on your work, your share goes to families in your community through the KeepNear Gift, or
+              to you as commission.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/partner/signup" className="btn">Register as a partner</Link>
@@ -89,15 +91,34 @@ export default async function PartnersPage({
 
         <section className="bg-plum py-12 text-cream" aria-labelledby="get">
           <div className="mx-auto max-w-5xl px-4">
-            <h2 id="get" className="text-3xl font-extrabold">What you get</h2>
+            <h2 id="get" className="text-3xl font-extrabold">Two ways to partner</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-cream p-6 text-plum-dark">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-muted">Solicitors · funeral directors · hospices · charities</p>
+                <h3 className="mt-1 text-2xl font-extrabold text-plum">The KeepNear Gift</h3>
+                <p className="mt-2">
+                  <strong>20% of what your clients pay in their first year, then 10% for as long as they stay</strong>, goes into a
+                  fund for struggling families. You nominate them; we pay for flowers, a wake or a headstone. Nothing is paid
+                  to your firm, so there&apos;s no referral fee to disclose.
+                </p>
+                <p className="mt-3 text-sm">Every 100 clients fund about <strong>£1,185 in year one and £790 a year after that</strong>.</p>
+                <Link href="/gift" className="mt-4 inline-block font-bold text-plum underline">See the Gift pot and every Gift paid</Link>
+              </div>
+              <div className="rounded-2xl bg-cream/10 p-6">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-peach">Insurers · financial advisers · will writers</p>
+                <h3 className="mt-1 text-2xl font-extrabold">Commission</h3>
+                <p className="mt-2">
+                  <strong>20% of every payment from clients you refer, for 24 months</strong>, paid quarterly once your balance
+                  reaches £50.
+                </p>
+                <p className="mt-3 text-sm">Every 100 clients earn you about <strong>£2,765 over two years</strong>, or £3,355 if they pay monthly.</p>
+              </div>
+            </div>
             <ul className="mt-6 grid gap-4 md:grid-cols-3">
               {[
-                ["20% revenue share", "On every payment from clients you refer, for 24 months. Founding partner rate."],
-                ["Free directory listing", "People without a solicitor or funeral director are shown our recommended partners, with a link to your website."],
-                ["Your own dashboard", "Live figures: directory views, clicks to your site, sign-ups and what you've earned. See an example at keepnear.co.uk/partner/demo."],
                 ["Your own client code", "Your clients get 25% off the Family plan for their first year with a code in your firm's name."],
-                ["Co-branded material", "Leaflets and email wording with your logo, ready to put in will packs."],
-                ["A named contact", "One person at KeepNear to call, and help for families when the time comes."],
+                ["Free directory listing", "People without a solicitor or funeral director are shown our recommended partners, with a link to your website."],
+                ["Your own dashboard", "Live views, clicks, sign-ups and your share. See an example at keepnear.co.uk/partner/demo."],
               ].map(([t, d]) => (
                 <li key={t} className="rounded-2xl bg-cream/10 p-5">
                   <h3 className="text-lg font-extrabold text-peach">{t}</h3>
@@ -105,6 +126,7 @@ export default async function PartnersPage({
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-cream/80">Figures assume clients stay on the Family plan, paid yearly, using your code.</p>
           </div>
         </section>
 

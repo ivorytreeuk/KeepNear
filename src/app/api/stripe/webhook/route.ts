@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
+import { shareFor, type Reward } from "@/lib/gift";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlan } from "@/lib/plans";
 
@@ -27,21 +28,29 @@ function planFromSubscription(sub: Stripe.Subscription) {
 }
 
 
-/** Records money received so it can be traced back to the partner who referred the customer (for 24 months). */
+/** Records money received, and the referring partner's share of it (Gift or commission). */
 async function recordPayment(id: string, userId: string | null, amountPence: number, currency: string, description: string) {
   if (!amountPence || amountPence <= 0) return;
   const admin = createAdminClient();
   let partnerId: string | null = null;
+  let share = 0;
   if (userId) {
     const { data: p } = await admin.from("profiles").select("referred_by, created_at").eq("id", userId).maybeSingle();
-    const withinTerm = p?.created_at && Date.now() - new Date(p.created_at).getTime() < 730 * 86400000;
-    partnerId = withinTerm ? (p?.referred_by ?? null) : null;
+    if (p?.referred_by) {
+      const { data: partner } = await admin.from("partners").select("id, reward, commission_rate").eq("id", p.referred_by).maybeSingle();
+      if (partner) {
+        partnerId = partner.id;
+        share = shareFor(amountPence, partner.reward as Reward, Number(partner.commission_rate), new Date(p.created_at));
+      }
+    }
   }
   await admin
     .from("payments")
-    .upsert({ id, user_id: userId, partner_id: partnerId, amount_pence: amountPence, currency, description }, { onConflict: "id", ignoreDuplicates: true });
+    .upsert(
+      { id, user_id: userId, partner_id: partnerId, amount_pence: amountPence, share_pence: share, currency, description },
+      { onConflict: "id", ignoreDuplicates: true }
+    );
 }
-
 
 /** If the customer used a partner's discount code, credit that partner (unless a referral link already did). */
 async function creditPartnerCode(s: Stripe, session: Stripe.Checkout.Session, userId: string) {
@@ -58,7 +67,14 @@ async function creditPartnerCode(s: Stripe, session: Stripe.Checkout.Session, us
     if (!partner) return;
     await admin.from("profiles").update({ referred_by: partner.id }).eq("id", userId).is("referred_by", null);
     // A first payment may have been recorded a moment earlier, before we knew about the code.
-    await admin.from("payments").update({ partner_id: partner.id }).eq("user_id", userId).is("partner_id", null);
+    const { data: full } = await admin.from("partners").select("reward, commission_rate").eq("id", partner.id).single();
+    const { data: orphans } = await admin.from("payments").select("id, amount_pence").eq("user_id", userId).is("partner_id", null);
+    for (const o of orphans ?? []) {
+      await admin
+        .from("payments")
+        .update({ partner_id: partner.id, share_pence: shareFor(o.amount_pence, (full?.reward ?? "gift") as Reward, Number(full?.commission_rate ?? 20), new Date()) })
+        .eq("id", o.id);
+    }
   } catch {
     // Attribution must never break billing.
   }
@@ -156,7 +172,7 @@ export async function POST(request: Request) {
       const admin = createAdminClient();
       const { data: last } = await admin
         .from("payments")
-        .select("partner_id")
+        .select("partner_id, amount_pence, share_pence")
         .eq("user_id", userId)
         .gt("amount_pence", 0)
         .order("created_at", { ascending: false })
@@ -169,6 +185,7 @@ export async function POST(request: Request) {
           user_id: userId,
           partner_id: last?.partner_id ?? null,
           amount_pence: -charge.amount_refunded,
+          share_pence: last?.amount_pence ? -Math.round((charge.amount_refunded * (last.share_pence ?? 0)) / last.amount_pence) : 0,
           currency: charge.currency ?? "gbp",
           description: "Refund",
         },
