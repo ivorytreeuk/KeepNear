@@ -147,6 +147,35 @@ export async function POST(request: Request) {
       if (inv.id) await recordPayment(inv.id, userId, inv.amount_paid ?? 0, inv.currency ?? "gbp", inv.lines?.data?.[0]?.description ?? "Subscription");
       break;
     }
+    case "charge.refunded": {
+      // A refund takes back the partner's 20% (or Gift contribution) on that money.
+      const charge = event.data.object as Stripe.Charge;
+      const customerId = typeof charge.customer === "string" ? charge.customer : charge.customer?.id ?? null;
+      const userId = await findUserId(customerId, null);
+      if (!userId || !charge.amount_refunded) break;
+      const admin = createAdminClient();
+      const { data: last } = await admin
+        .from("payments")
+        .select("partner_id")
+        .eq("user_id", userId)
+        .gt("amount_pence", 0)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      // One row per charge, updated if it's refunded in more than one go.
+      await admin.from("payments").upsert(
+        {
+          id: `refund_${charge.id}`,
+          user_id: userId,
+          partner_id: last?.partner_id ?? null,
+          amount_pence: -charge.amount_refunded,
+          currency: charge.currency ?? "gbp",
+          description: "Refund",
+        },
+        { onConflict: "id" }
+      );
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });
