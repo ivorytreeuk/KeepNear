@@ -42,6 +42,28 @@ async function recordPayment(id: string, userId: string | null, amountPence: num
     .upsert({ id, user_id: userId, partner_id: partnerId, amount_pence: amountPence, currency, description }, { onConflict: "id", ignoreDuplicates: true });
 }
 
+
+/** If the customer used a partner's discount code, credit that partner (unless a referral link already did). */
+async function creditPartnerCode(s: Stripe, session: Stripe.Checkout.Session, userId: string) {
+  try {
+    const promoIds = (session.discounts ?? [])
+      .map((d) => (typeof d.promotion_code === "string" ? d.promotion_code : d.promotion_code?.id))
+      .filter((x): x is string => Boolean(x));
+    if (!promoIds.length) return;
+    const promo = await s.promotionCodes.retrieve(promoIds[0]);
+    const code = promo.code?.toUpperCase();
+    if (!code) return;
+    const admin = createAdminClient();
+    const { data: partner } = await admin.from("partners").select("id").ilike("promo_code", code).maybeSingle();
+    if (!partner) return;
+    await admin.from("profiles").update({ referred_by: partner.id }).eq("id", userId).is("referred_by", null);
+    // A first payment may have been recorded a moment earlier, before we knew about the code.
+    await admin.from("payments").update({ partner_id: partner.id }).eq("user_id", userId).is("partner_id", null);
+  } catch {
+    // Attribution must never break billing.
+  }
+}
+
 async function applySubscription(sub: Stripe.Subscription) {
   const admin = createAdminClient();
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
@@ -88,6 +110,7 @@ export async function POST(request: Request) {
       const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
       const userId = await findUserId(customerId, session.metadata?.user_id ?? session.client_reference_id);
       if (!userId) break;
+      await creditPartnerCode(s, session, userId);
 
       if (session.mode === "payment" && session.metadata?.plan === "lifetime" && session.payment_status === "paid") {
         const { data: profile } = await admin

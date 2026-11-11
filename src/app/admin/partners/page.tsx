@@ -19,6 +19,7 @@ type Partner = {
   reference: string | null;
   source: string | null;
   contact_name: string | null;
+  promo_code: string | null;
 };
 
 function PartnerForm({ p, members, action, submit }: { p?: Partner; members?: string; action: (f: FormData) => Promise<void>; submit: string }) {
@@ -58,6 +59,10 @@ function PartnerForm({ p, members, action, submit }: { p?: Partner; members?: st
       <label className="flex flex-col gap-1 text-sm font-bold">
         Commission (% of revenue from their referrals)
         <input name="commission_rate" type="number" min={0} max={100} step="0.5" defaultValue={p?.commission_rate ?? 20} className="field font-normal" />
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-bold">
+        Clients&apos; discount code (create the same code in Stripe)
+        <input name="promo_code" defaultValue={p?.promo_code ?? ""} placeholder="HARPER25" className="field font-normal uppercase" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-bold">
         Dashboard logins (KeepNear account emails, comma-separated)
@@ -185,7 +190,7 @@ export default async function PartnersAdmin({
             )}
             <p><strong>Referral link to give them:</strong> <code className="break-all">{SITE}/r/{p.slug}</code></p>
             <p><strong>Their directory listing:</strong> <a className="text-plum underline" href={`/directory?type=${p.type}`} target="_blank" rel="noopener noreferrer">{SITE}/directory</a></p>
-            <p><strong>Partner dashboard:</strong> {SITE}/partner (they log in with a KeepNear account using an email listed below)</p>
+            <p><strong>Partner dashboard:</strong> {SITE}/partner/login · <a href={`/partner?as=${p.id}`} target="_blank" rel="noopener" className="font-bold text-plum underline">See their dashboard as they see it</a></p>
           </div>
           <div className="mt-4">
             <PartnerForm

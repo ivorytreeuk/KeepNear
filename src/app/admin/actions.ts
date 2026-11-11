@@ -146,6 +146,7 @@ function partnerFields(formData: FormData) {
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     phone: String(formData.get("phone") ?? "").trim() || null,
     commission_rate: rate,
+    promo_code: String(formData.get("promo_code") ?? "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 30) || null,
     active: formData.get("active") === "on",
   };
 }

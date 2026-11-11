@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAdminPath = path.startsWith("/admin");
-  const isPartnerPath = path === "/partner" || (path.startsWith("/partner/") && path !== "/partner/login" && path !== "/partner/signup");
+  const isPartnerPath = path === "/partner" || (path.startsWith("/partner/") && path !== "/partner/login" && path !== "/partner/signup" && path !== "/partner/demo");
   const protectedPath = path.startsWith("/vault") || isAdminPath || isPartnerPath;
 
   if (!user && protectedPath) {

@@ -38,6 +38,10 @@ export async function getAdminUser() {
   return user;
 }
 
+export async function isAdminUnlocked(userId: string) {
+  return sessionValid(userId);
+}
+
 async function sessionValid(userId: string) {
   if (!passcodeConfigured()) return false;
   const raw = (await cookies()).get(COOKIE)?.value;

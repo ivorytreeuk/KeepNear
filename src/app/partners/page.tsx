@@ -94,8 +94,8 @@ export default async function PartnersPage({
               {[
                 ["20% revenue share", "On every payment from clients you refer, for 24 months. Founding partner rate."],
                 ["Free directory listing", "People without a solicitor or funeral director are shown our recommended partners, with a link to your website."],
-                ["Your own dashboard", "Live figures: directory views, clicks to your site, sign-ups and what you've earned."],
-                ["Client offers", "A discount code for your clients, or the value passed on to them instead of a fee."],
+                ["Your own dashboard", "Live figures: directory views, clicks to your site, sign-ups and what you've earned. See an example at keepnear.co.uk/partner/demo."],
+                ["Your own client code", "Your clients get 25% off the Family plan for their first year with a code in your firm's name."],
                 ["Co-branded material", "Leaflets and email wording with your logo, ready to put in will packs."],
                 ["A named contact", "One person at KeepNear to call, and help for families when the time comes."],
               ].map(([t, d]) => (
